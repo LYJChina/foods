@@ -1,3 +1,9 @@
+# 潮州市食品行业 AI 公共服务平台 Demo
+
+本分支在 FastapiAdmin 基础上建设食品行业公共 AI 服务演示门户。所有页面和数据均明确标注为演示内容，不代表正式政府系统；业务范围、数据边界和运行方式见 docs 目录。
+
+上游项目说明如下。
+
 <div align="center">
      <p align="center">
           <img src="./frontend/web/public/logo.png" width="150" height="150" alt="logo" />
