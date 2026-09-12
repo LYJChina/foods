@@ -7,7 +7,7 @@ import { assistantPrompts } from "../content";
 const isOpen = ref(
   typeof window === "undefined" || typeof window.matchMedia !== "function"
     ? true
-    : !window.matchMedia("(max-width: 768px)").matches
+    : !window.matchMedia("(max-width: 1280px)").matches
 );
 const input = ref("");
 const answer = ref("您可以从出口预检、场景体验或数智化诊断开始。");

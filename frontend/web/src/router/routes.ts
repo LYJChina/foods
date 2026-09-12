@@ -280,13 +280,13 @@ export const staticRoutes: AppRouteRecordRaw[] = [
       {
         path: "precheck",
         name: "PortalPrecheck",
-        component: () => import("@views/portal/placeholder.vue"),
+        component: () => import("@views/portal/precheck/index.vue"),
         meta: { public: true, title: "出口合规预检" },
       },
       {
         path: "precheck/:taskId",
         name: "PortalPrecheckResult",
-        component: () => import("@views/portal/placeholder.vue"),
+        component: () => import("@views/portal/precheck/result.vue"),
         meta: { public: true, title: "预检结果" },
       },
       {
