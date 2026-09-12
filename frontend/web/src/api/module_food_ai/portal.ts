@@ -1,6 +1,11 @@
 import { NO_AUTH_FLAG, request } from "@utils";
 
-import type { PrecheckCreate, PrecheckTask } from "@/types/food-ai";
+import type {
+  DiagnosisAnswers,
+  DiagnosisResult,
+  PrecheckCreate,
+  PrecheckTask,
+} from "@/types/food-ai";
 
 const API_PATH = "/food-ai";
 
@@ -19,6 +24,16 @@ export const FoodAIPortalAPI = {
     const response = await request<ApiResponse<PrecheckTask>>({
       url: API_PATH + "/prechecks/" + encodeURIComponent(taskId),
       method: "get",
+      headers: { Authorization: NO_AUTH_FLAG },
+    });
+    return response.data.data;
+  },
+
+  async createDiagnosis(body: DiagnosisAnswers): Promise<DiagnosisResult> {
+    const response = await request<ApiResponse<DiagnosisResult>>({
+      url: API_PATH + "/diagnoses",
+      method: "post",
+      data: body,
       headers: { Authorization: NO_AUTH_FLAG },
     });
     return response.data.data;

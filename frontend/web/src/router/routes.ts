@@ -292,13 +292,13 @@ export const staticRoutes: AppRouteRecordRaw[] = [
       {
         path: "scenarios",
         name: "PortalScenarios",
-        component: () => import("@views/portal/placeholder.vue"),
+        component: () => import("@views/portal/scenarios/index.vue"),
         meta: { public: true, title: "AI 应用场景" },
       },
       {
         path: "diagnosis",
         name: "PortalDiagnosis",
-        component: () => import("@views/portal/placeholder.vue"),
+        component: () => import("@views/portal/diagnosis/index.vue"),
         meta: { public: true, title: "数智化诊断" },
       },
     ],

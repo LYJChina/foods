@@ -38,3 +38,25 @@ export interface PrecheckTask {
   request: PrecheckCreate;
   result: PrecheckResult;
 }
+
+export interface DiagnosisAnswers {
+  digital_foundation: number;
+  data_readiness: number;
+  ai_experience: number;
+  governance_readiness: number;
+  export_need: number;
+}
+
+export type DiagnosisMaturity = "start" | "prepare" | "advance";
+export type DiagnosisRecommendationKey =
+  | "public_platform"
+  | "light_poc"
+  | "enterprise_project";
+
+export interface DiagnosisResult {
+  score: number;
+  maturity: DiagnosisMaturity;
+  recommendations: Record<DiagnosisRecommendationKey, string[]>;
+  disclaimer: string;
+  is_demo: true;
+}
