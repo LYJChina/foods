@@ -22,6 +22,7 @@ export interface RouteMeta extends Record<string | number | symbol, unknown> {
   parentPath?: string;
   shellRoute?: boolean;
   remountOnFullPath?: boolean;
+  public?: boolean;
   scope?: "web" | "app";
 }
 
@@ -93,5 +94,8 @@ declare module "vue-router" {
      * @default false
      */
     breadcrumb?: boolean;
+
+    /** 是否允许未登录用户访问 */
+    public?: boolean;
   }
 }

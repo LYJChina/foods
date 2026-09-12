@@ -29,6 +29,8 @@ import FastlinkChangelog from "@views/fastlink/changelog/index.vue";
 import FastlinkPricing from "@views/fastlink/pricing/index.vue";
 import FastlinkTutorial from "@views/fastlink/tutorial/index.vue";
 import FastlinkFachat from "@views/fastlink/fachat/index.vue";
+import PortalLayout from "@/layouts/portal/index.vue";
+import PortalHome from "@views/portal/home/index.vue";
 
 // ──────── IframeRouteManager ────────
 
@@ -260,6 +262,46 @@ export const staticRoutes: AppRouteRecordRaw[] = [
     name: "500",
     meta: { hidden: true, isHideTab: true, title: "500" },
     component: Exception500,
+  },
+  // 匿名公开门户：与登录后管理端壳层隔离
+  {
+    path: "/portal",
+    name: "Portal",
+    redirect: "/portal/home",
+    component: PortalLayout,
+    meta: { public: true, hidden: true, isHideTab: true, title: "食品 AI 公共服务平台" },
+    children: [
+      {
+        path: "home",
+        name: "PortalHome",
+        component: PortalHome,
+        meta: { public: true, title: "首页" },
+      },
+      {
+        path: "precheck",
+        name: "PortalPrecheck",
+        component: () => import("@views/portal/placeholder.vue"),
+        meta: { public: true, title: "出口合规预检" },
+      },
+      {
+        path: "precheck/:taskId",
+        name: "PortalPrecheckResult",
+        component: () => import("@views/portal/placeholder.vue"),
+        meta: { public: true, title: "预检结果" },
+      },
+      {
+        path: "scenarios",
+        name: "PortalScenarios",
+        component: () => import("@views/portal/placeholder.vue"),
+        meta: { public: true, title: "AI 应用场景" },
+      },
+      {
+        path: "diagnosis",
+        name: "PortalDiagnosis",
+        component: () => import("@views/portal/placeholder.vue"),
+        meta: { public: true, title: "数智化诊断" },
+      },
+    ],
   },
   // 根 Layout：存放壳层路由（home/dashboard/fastlink）
   {

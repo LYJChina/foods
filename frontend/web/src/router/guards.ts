@@ -33,6 +33,7 @@ const ANONYMOUS_PUBLIC_REGEXPS = [
   /^\/500$/,
   /^\/redirect/,
   /^\/login$/,
+  /^\/portal(?:\/|$)/,
 ];
 function isAnonymousPublicPath(path: string): boolean {
   return ANONYMOUS_PUBLIC_REGEXPS.some((regexp) => regexp.test(path));
