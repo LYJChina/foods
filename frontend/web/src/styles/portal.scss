@@ -257,6 +257,83 @@
 .portal-recommendations h3 { margin: 10px 0; font-size: 18px; }
 .portal-recommendations ul { margin: 0; padding-left: 20px; color: var(--portal-muted); }
 
+/* 桌面端采用紧凑信息密度；移动端保留 16px 正文与 44px 触控目标。 */
+@media (min-width: 1025px) {
+  .portal-container { width: min(1080px, calc(100% - 40px)); }
+  .portal-header__brand-row { min-height: 72px; }
+  .portal-brand { min-height: 56px; gap: 12px; }
+  .portal-brand__mark { width: 44px; height: 44px; border-radius: 12px; }
+  .portal-brand__mark svg { width: 24px; height: 24px; }
+  .portal-brand strong { font-size: clamp(18px, 1.55vw, 22px); }
+  .portal-nav a { min-height: 44px; padding-inline: 18px; }
+
+  .portal-hero { padding: 40px 0 36px; }
+  .portal-hero__grid { grid-template-columns: minmax(0, 1.6fr) minmax(260px, .75fr); gap: 30px; }
+  .portal-hero h1 { max-width: 680px; margin: 8px 0 12px; font-size: clamp(32px, 3.4vw, 44px); }
+  .portal-hero__copy > p { max-width: 700px; font-size: 17px; }
+  .portal-hero__actions { margin-top: 20px; }
+  .portal-hero__boundary { padding: 20px; }
+  .portal-hero__boundary > svg { width: 30px; height: 30px; }
+  .portal-hero__boundary h2 { margin-top: 8px; font-size: 19px; }
+
+  .portal-section { padding-block: 38px; }
+  .portal-section__heading { margin-bottom: 18px; }
+  .portal-section__heading h2 { font-size: clamp(25px, 2.5vw, 30px); }
+  .portal-service-card { min-height: 230px; padding: 18px; }
+  .portal-service-card__icon { width: 40px; height: 40px; }
+  .portal-service-card__icon svg { width: 22px; height: 22px; }
+  .portal-service-card h3 { margin: 12px 0 6px; font-size: 18px; }
+  .portal-service-card p { margin-bottom: 10px; }
+  .portal-metrics > div { padding: 13px 16px; }
+  .portal-metrics dt { font-size: 25px; }
+  .portal-panel { min-height: 250px; padding: 18px; }
+  .portal-panel h3 { margin-bottom: 18px; }
+  .portal-bars { gap: 14px; }
+  .portal-output { min-height: 180px; gap: 34px; }
+  .portal-output__ring { width: 120px; height: 120px; }
+  .portal-output__ring::after { width: 74px; height: 74px; }
+  .portal-output__ring span { font-size: 26px; }
+  .portal-output ul { gap: 12px; }
+  .portal-footer { padding: 20px 0 78px; }
+
+  .portal-assistant { right: 18px; bottom: 18px; width: min(320px, calc(100vw - 32px)); }
+  .portal-assistant__header { min-height: 56px; }
+  .portal-assistant__body { padding: 12px; }
+  .portal-assistant__answer { padding: 12px; }
+  .portal-assistant-launcher { right: 18px; bottom: 18px; }
+
+  .portal-page { padding-block: 34px 52px; }
+  .portal-page__intro { margin-bottom: 20px; }
+  .portal-page__intro h1 { font-size: clamp(30px, 3vw, 38px); }
+  .portal-precheck-layout { grid-template-columns: minmax(0, 1fr) 280px; gap: 16px; }
+  .portal-form-card { padding: 22px; }
+  .portal-form-card__top { gap: 18px; padding-bottom: 16px; margin-bottom: 20px; }
+  .portal-form-card h2 { font-size: 23px; }
+  .portal-form-grid { gap: 16px; }
+  .portal-form-actions { padding-top: 18px; margin-top: 18px; }
+  .portal-side-note { padding: 18px; }
+  .portal-side-note h3 { margin-top: 16px; }
+  .portal-result { gap: 14px; }
+  .portal-result__summary, .portal-result__section { padding: 18px; }
+  .portal-result__summary h2 { font-size: 23px; }
+  .portal-risk-card { padding-block: 12px; }
+
+  .portal-scenario-card { min-height: 250px; padding: 19px; }
+  .portal-scenario-card__icon { width: 40px; height: 40px; }
+  .portal-scenario-card h2 { margin: 12px 0 6px; font-size: 19px; }
+  .portal-scenario-card > p { margin-bottom: 14px; }
+  .portal-scenario-next { padding: 20px; margin-top: 20px; }
+
+  .portal-diagnosis-layout { grid-template-columns: minmax(0, 1fr) 280px; gap: 16px; }
+  .portal-diagnosis-form { padding: 20px; }
+  .portal-question { padding-bottom: 18px; margin-bottom: 18px; }
+  .portal-question > p { margin-bottom: 10px; }
+  .portal-diagnosis-note { padding: 18px; }
+  .portal-diagnosis-result { padding: 20px; margin-top: 16px; }
+  .portal-score-track { margin: 14px 0 18px; }
+  .portal-recommendations article { padding: 14px; }
+}
+
 @media (max-width: 1024px) {
   .portal-service-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .portal-hero__grid { grid-template-columns: 1fr; }

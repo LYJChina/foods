@@ -42,4 +42,17 @@ describe("portal homepage", () => {
 
     expect(wrapper.find('button[aria-label="展开 AI 助手"]').exists()).toBe(true);
   });
+
+  it("starts collapsed at standard desktop widths so cards remain unobscured", () => {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn().mockImplementation((query: string) => ({ matches: query === "(max-width: 1599px)" }))
+    );
+
+    const wrapper = mount(PortalLayout, {
+      global: { stubs: { RouterView: true, RouterLink: RouterLinkStub } },
+    });
+
+    expect(wrapper.find('button[aria-label="展开 AI 助手"]').exists()).toBe(true);
+  });
 });
