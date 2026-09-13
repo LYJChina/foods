@@ -1,4 +1,4 @@
-import { mount, RouterLinkStub } from "@vue/test-utils";
+import { flushPromises, mount, RouterLinkStub } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
 
 import PortalLayout from "@/layouts/portal/index.vue";
@@ -6,19 +6,21 @@ import PortalHome from "@/views/portal/home/index.vue";
 import PortalServices from "@/views/portal/services/index.vue";
 
 describe("portal homepage", () => {
-  it("presents the four public service entrances and demo data disclosure", () => {
+  it("presents the operations overview and sample data disclosure", async () => {
     const wrapper = mount(PortalHome, {
       global: { stubs: { RouterLink: RouterLinkStub } },
     });
+    await flushPromises();
 
-    expect(wrapper.get("h1").text()).toContain("看得见 AI");
-    expect(wrapper.findAll('[data-testid="service-card"]')).toHaveLength(4);
-    expect(wrapper.text()).toContain("出口合规与海外服务");
-    expect(wrapper.text()).toContain("演示数据，非实时统计");
+    expect(wrapper.get("h1").text()).toContain("运行概况");
+    expect(wrapper.text()).toContain("累计办理事项");
+    expect(wrapper.text()).toContain("示例数据");
+    expect(wrapper.text()).toContain("公共服务助手");
+    expect(wrapper.text()).toContain("最近办理事项");
     expect(
       wrapper
         .findAllComponents(RouterLinkStub)
-        .some((link) => link.props("to") === "/portal/precheck")
+        .some((link) => link.props("to") === "/portal/documents")
     ).toBe(true);
   });
 
