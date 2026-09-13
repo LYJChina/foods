@@ -116,7 +116,8 @@ const handleOnline = () => {
 };
 
 onMounted(() => {
-  bootstrap();
+  const initialHashPath = window.location.hash.slice(1) || "/";
+  bootstrap(router.resolve(initialHashPath).path);
 
   // 存储检测到异常并已清除数据 → 由路由守卫完成登出清理
   window.addEventListener("app:storage-invalidated", handleStorageInvalidated);

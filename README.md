@@ -2,6 +2,15 @@
 
 本分支在 FastapiAdmin 基础上建设食品行业公共 AI 服务演示门户。所有页面和数据均明确标注为演示内容，不代表正式政府系统；业务范围、数据边界和运行方式见 docs 目录。
 
+## Demo 快速入口
+
+- 本地运行、演示路径与故障排查：[docs/DEMO_RUNBOOK.md](docs/DEMO_RUNBOOK.md)
+- API key 与国产大模型接入边界：[docs/API_KEY_SECURITY.md](docs/API_KEY_SECURITY.md)
+- 上游仓库、版本与许可证记录：[docs/UPSTREAM.md](docs/UPSTREAM.md)
+- 门户默认入口：`http://127.0.0.1:5180/web/#/portal/home`
+
+当前交付是确定性 Mock Demo：后端不依赖真实 OCR、实时法规库或大模型，任务仅保存在进程内存中，服务重启后即丢失。前端依赖命令统一使用 `npx --yes pnpm@9.15.3`，避免本机 pnpm 版本差异影响锁文件和构建结果。
+
 上游项目说明如下。
 
 <div align="center">

@@ -15,12 +15,14 @@ import {
 export function useAppBootstrap() {
   const { initSiteConfig } = useSiteConfig();
 
-  const bootstrap = () => {
+  const bootstrap = (routePath = "") => {
     checkStorageCompatibility();
     toggleTransition(false);
     systemUpgrade();
     startVersionPolling();
-    initSiteConfig();
+    if (!routePath.startsWith("/portal")) {
+      initSiteConfig();
+    }
   };
 
   return { bootstrap };
