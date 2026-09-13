@@ -24,8 +24,13 @@ describe("portal content adapter", () => {
   it("returns an isolated copy for each request", async () => {
     const first = await PortalContentAPI.getHomeContent();
     const second = await PortalContentAPI.getHomeContent();
+    const firstNews = first.news[0];
+    const secondNews = second.news[0];
 
-    first.news[0].title = "已被调用方修改";
-    expect(second.news[0].title).not.toBe("已被调用方修改");
+    expect(firstNews).toBeDefined();
+    expect(secondNews).toBeDefined();
+    if (!firstNews || !secondNews) return;
+    firstNews.title = "已被调用方修改";
+    expect(secondNews.title).not.toBe("已被调用方修改");
   });
 });

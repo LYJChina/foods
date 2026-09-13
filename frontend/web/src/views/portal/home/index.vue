@@ -1,706 +1,237 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { Icon } from "@iconify/vue";
-import { DashboardAPI, type DashboardSnapshot } from "@/api/module_food_ai/dashboard";
-import { publicServices, quickAssistantCases } from "@/views/portal/services/catalog";
+import { useRouter } from "vue-router";
 
-const snapshot = ref<DashboardSnapshot | null>(null),
-  loading = ref(true),
-  error = ref("");
-const selectedCase = ref(quickAssistantCases[0]),
-  query = ref(""),
-  recommendation = ref("");
-const range = ref<"7d" | "30d">("7d");
-const selectedService = computed(() =>
-  publicServices.find((item) => item.id === selectedCase.value?.serviceId)
-);
-const maxTrend = computed(() =>
-  Math.max(...(snapshot.value?.trend.map((item) => item.handled) ?? [1]))
-);
-const maxDistribution = computed(() =>
-  Math.max(...(snapshot.value?.distribution.map((item) => item.handled) ?? [1]))
-);
-const metrics = computed(() => {
-  const summary = snapshot.value?.summary;
-  return [
-    { label: "累计办理事项", value: summary?.total_handled ?? 0, unit: "件", icon: "ri:task-line" },
-    {
-      label: "知识库收录文档",
-      value: summary?.knowledge_documents ?? 0,
-      unit: "份",
-      icon: "ri:book-3-line",
-    },
-    { label: "今日服务人数", value: summary?.today_users ?? 0, unit: "人", icon: "ri:user-3-line" },
-    {
-      label: "当前开放智能服务",
-      value: summary?.active_agents ?? 0,
-      unit: "个",
-      icon: "ri:apps-2-line",
-    },
-  ];
-});
-async function load() {
+import {
+  PortalContentAPI,
+  type PortalHomeContent,
+} from "@/api/module_food_ai/content";
+
+const router = useRouter();
+const query = ref("");
+const content = ref<PortalHomeContent | null>(null);
+const loading = ref(true);
+const loadError = ref("");
+
+async function loadContent() {
   loading.value = true;
-  error.value = "";
+  loadError.value = "";
   try {
-    snapshot.value = await DashboardAPI.getSnapshot();
+    content.value = await PortalContentAPI.getHomeContent();
   } catch {
-    error.value = "运行概况暂时无法加载，请稍后重试。";
+    loadError.value = "信息栏目暂时无法加载，请稍后重试。";
   } finally {
     loading.value = false;
   }
 }
-function selectCase(item: (typeof quickAssistantCases)[number]) {
-  selectedCase.value = item;
-  query.value = item.prompt;
-  recommendation.value = "";
+
+function openAssistant() {
+  const normalized = query.value.trim();
+  return router.push({
+    path: "/portal/assistant",
+    query: normalized ? { q: normalized } : undefined,
+  });
 }
-function recommend() {
-  const text = query.value.trim().toLowerCase();
-  const match = quickAssistantCases.find((item) =>
-    item.keywords.some((word) => text.includes(word.toLowerCase()))
-  );
-  recommendation.value = match
-    ? `为你推荐：${publicServices.find((service) => service.id === match.serviceId)?.name ?? "智能服务"}`
-    : "暂未找到对应服务，请前往智能服务大厅选择。";
-  if (match) selectedCase.value = match;
+
+function openHotQuestion(question: string) {
+  query.value = question;
+  return openAssistant();
 }
-onMounted(load);
+
+function openOnEmptyClick() {
+  if (!query.value.trim()) return openAssistant();
+}
+
+onMounted(loadContent);
 </script>
 
 <template>
-  <main class="portal-page portal-dashboard-home portal-container">
-    <header class="dashboard-heading">
-      <div>
-        <h1>运行概况</h1>
-      </div>
-      <div class="dashboard-heading__meta">
-        <span class="sample-badge">示例数据</span
-        ><small>数据更新时间：{{ snapshot?.summary.updated_at ?? "—" }}</small
-        ><span class="service-health"><i></i>服务运行正常</span>
-      </div>
-    </header>
-    <div v-if="error" class="dashboard-inline-error" role="alert">
-      <Icon icon="ri:error-warning-line" />{{ error
-      }}<button type="button" @click="load">重试</button>
-    </div>
-    <section v-if="!loading" class="dashboard-metrics" aria-label="运行指标">
-      <article v-for="metric in metrics" :key="metric.label" class="dashboard-metric">
-        <span class="dashboard-metric__icon"><Icon :icon="metric.icon" /></span>
-        <div>
-          <small>{{ metric.label }}</small
-          ><strong
-            >{{ metric.value.toLocaleString("zh-CN") }}<em>{{ metric.unit }}</em></strong
-          >
-        </div>
-      </article>
-    </section>
-    <div v-else class="dashboard-loading">正在加载运行概况…</div>
-    <section v-if="snapshot" class="dashboard-main-grid">
-      <div class="dashboard-visuals">
-        <article class="dashboard-panel dashboard-trend">
-          <header>
-            <div>
-              <span>服务趋势</span>
-              <h2>近 7 日办理情况</h2>
-            </div>
-            <div class="dashboard-range">
-              <button :class="{ active: range === '7d' }" type="button" @click="range = '7d'">
-                近 7 日</button
-              ><button :class="{ active: range === '30d' }" type="button" @click="range = '30d'">
-                近 30 日
-              </button>
-            </div>
-          </header>
-          <div class="trend-chart" role="img" aria-label="近七日服务办理趋势">
-            <div v-for="point in snapshot.trend" :key="point.date" class="trend-column">
-              <strong>{{ point.handled }}</strong
-              ><i :style="{ height: `${Math.max(8, (point.handled / maxTrend) * 100)}%` }"></i
-              ><small>{{ point.date.slice(5) }}</small>
-            </div>
-          </div>
-          <p class="chart-note">数据为首页展示样例，正式接入后将由统计接口提供。</p>
-        </article>
-        <article class="dashboard-panel">
-          <header>
-            <div>
-              <span>服务分布</span>
-              <h2>各智能服务办理量</h2>
-            </div>
-            <span class="panel-unit">办理量</span>
-          </header>
-          <ul class="distribution-list">
-            <li v-for="item in snapshot.distribution" :key="item.service_id">
-              <div>
-                <span>{{ item.service_name }}</span
-                ><strong>{{ item.handled }}</strong>
-              </div>
-              <span class="distribution-track"
-                ><i :style="{ width: `${(item.handled / maxDistribution) * 100}%` }"></i
-              ></span>
-            </li>
-          </ul>
-        </article>
-      </div>
-      <aside class="dashboard-assistant dashboard-panel">
-        <header>
-          <div class="assistant-title">
-            <span><Icon icon="ri:customer-service-2-line" /></span>
-            <div>
-              <span>公共服务助手</span>
-              <h2>从这里开始办理</h2>
-            </div>
-          </div>
-          <small>服务导航</small>
-        </header>
-        <p class="assistant-welcome">你好，我可以根据你的需求推荐合适的公共服务。</p>
-        <div class="assistant-cases">
-          <button
-            v-for="item in quickAssistantCases"
-            :key="item.id"
-            type="button"
-            :class="{ active: selectedCase?.id === item.id }"
-            @click="selectCase(item)"
-          >
-            {{ item.prompt }}
-          </button>
-        </div>
-        <label for="assistant-query">描述你的需求</label>
-        <div class="assistant-input">
+  <main class="portal-home">
+    <section class="portal-home-search" aria-labelledby="portal-search-title">
+      <div class="portal-container portal-home-search__inner">
+        <p class="portal-home-search__eyebrow">食品行业公共服务</p>
+        <h1 id="portal-search-title">AI 助手，帮您查找公共服务</h1>
+        <p class="portal-home-search__lead">政策咨询、办事导航、材料解析，一次输入直达对应服务。</p>
+        <form
+          data-testid="ai-search-form"
+          class="portal-ai-search"
+          role="search"
+          @submit.prevent="openAssistant"
+        >
+          <label for="portal-ai-query">
+            <Icon icon="ri:sparkling-2-line" aria-hidden="true" />
+            <span>AI 助手</span>
+          </label>
           <input
-            id="assistant-query"
+            id="portal-ai-query"
             v-model="query"
-            placeholder="例如：我想解析一份政策文件"
-            @keyup.enter="recommend"
-          /><button type="button" aria-label="查找服务" @click="recommend">
-            <Icon icon="ri:arrow-right-line" />
+            data-testid="ai-search-input"
+            type="search"
+            autocomplete="off"
+            placeholder="请输入您想咨询或办理的事项"
+            @click="openOnEmptyClick"
+          />
+          <button type="submit"><Icon icon="ri:search-line" aria-hidden="true" />开始查询</button>
+        </form>
+        <div v-if="content" class="portal-hot-questions" aria-label="热门问题">
+          <span>热门问题：</span>
+          <button
+            v-for="question in content.hotQuestions"
+            :key="question"
+            type="button"
+            @click="openHotQuestion(question)"
+          >
+            {{ question }}
           </button>
-        </div>
-        <p v-if="recommendation" class="assistant-recommendation">
-          <Icon icon="ri:lightbulb-line" />{{ recommendation }}
-        </p>
-        <div v-if="selectedService" class="assistant-result">
-          <small>推荐服务</small><strong>{{ selectedService.name }}</strong
-          ><span>{{ selectedService.description }}</span
-          ><RouterLink
-            v-if="selectedService.route"
-            class="portal-button portal-button--primary"
-            :to="selectedService.route"
-            >立即办理 <Icon icon="ri:arrow-right-line"
-          /></RouterLink>
-        </div>
-      </aside>
-    </section>
-    <section v-if="snapshot" class="dashboard-recent dashboard-panel">
-      <header>
-        <div>
-          <span>办理动态</span>
-          <h2>最近办理事项</h2>
-        </div>
-        <span class="sample-badge">示例数据</span>
-      </header>
-      <div class="recent-table" role="table" aria-label="最近办理事项">
-        <div class="recent-row recent-row--head" role="row">
-          <span>事项名称</span><span>使用服务</span><span>提交时间</span><span>状态</span>
-        </div>
-        <div v-for="item in snapshot.recent_cases" :key="item.id" class="recent-row" role="row">
-          <strong>{{ item.title }}</strong
-          ><span>{{ item.service_name }}</span
-          ><span>{{ item.submitted_at.replace("T", " ").slice(0, 16) }}</span
-          ><span class="case-status" :class="`is-${item.status}`">{{
-            item.status === "completed"
-              ? "已完成"
-              : item.status === "processing"
-                ? "处理中"
-                : "处理失败"
-          }}</span>
         </div>
       </div>
     </section>
+
+    <div class="portal-container portal-home__body">
+      <section v-if="content" class="portal-quick-actions" aria-label="快捷服务">
+        <RouterLink v-for="item in content.quickActions" :key="item.id" :to="item.to">
+          <span class="portal-quick-actions__icon" aria-hidden="true"><Icon :icon="item.icon" /></span>
+          <span><strong>{{ item.label }}</strong><small>{{ item.description }}</small></span>
+          <Icon class="portal-quick-actions__arrow" icon="ri:arrow-right-s-line" aria-hidden="true" />
+        </RouterLink>
+      </section>
+
+      <section v-if="content" class="portal-home-section" aria-labelledby="service-zones-title">
+        <header class="portal-home-section__heading">
+          <div><h2 id="service-zones-title">服务专区</h2><span></span></div>
+          <RouterLink to="/portal/services">查看全部服务 <Icon icon="ri:arrow-right-line" /></RouterLink>
+        </header>
+        <div class="portal-service-zones">
+          <RouterLink v-for="zone in content.serviceZones" :key="zone.id" :to="zone.to">
+            <span class="portal-service-zones__icon" aria-hidden="true"><Icon :icon="zone.icon" /></span>
+            <div>
+              <h3>{{ zone.title }}</h3>
+              <p>{{ zone.services.join(" · ") }}</p>
+            </div>
+            <Icon class="portal-service-zones__arrow" icon="ri:arrow-right-line" aria-hidden="true" />
+          </RouterLink>
+        </div>
+      </section>
+
+      <section class="portal-home-section" aria-label="平台信息">
+        <div v-if="loading" class="portal-information-loading">正在加载平台信息…</div>
+        <div v-else-if="loadError" class="portal-information-error" role="alert">
+          <span>{{ loadError }}</span><button type="button" @click="loadContent">重新加载</button>
+        </div>
+        <div v-else-if="content" class="portal-information-grid">
+          <article>
+            <header class="portal-information-heading">
+              <div><h2>工作动态</h2><span></span></div>
+              <small>示例信息</small>
+            </header>
+            <ul>
+              <li v-for="item in content.news" :key="item.id">
+                <a href="#portal-information-note" @click.prevent>
+                  <span>{{ item.title }}</span><time :datetime="item.date">{{ item.date }}</time>
+                </a>
+              </li>
+            </ul>
+          </article>
+          <article>
+            <header class="portal-information-heading">
+              <div><h2>通知公告</h2><span></span></div>
+              <small>示例信息</small>
+            </header>
+            <ul>
+              <li v-for="item in content.notices" :key="item.id">
+                <a href="#portal-information-note" @click.prevent>
+                  <span>{{ item.title }}</span><time :datetime="item.date">{{ item.date }}</time>
+                </a>
+              </li>
+            </ul>
+          </article>
+        </div>
+        <p id="portal-information-note" class="portal-information-note">
+          本栏目为页面展示样例，不代表政府部门或监管机构正式发布。
+        </p>
+      </section>
+    </div>
   </main>
 </template>
 
 <style scoped lang="scss">
-.portal-dashboard-home {
-  padding-top: 26px;
-  padding-bottom: 56px;
-}
-.dashboard-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 24px;
-  padding-bottom: 14px;
-  border-bottom: 2px solid var(--portal-navy);
-}
-.dashboard-heading h1 {
-  margin: 0;
-  font-size: 32px;
-  color: var(--portal-navy);
-}
-.dashboard-heading p {
-  margin: 0;
-  color: var(--portal-muted);
-}
-.dashboard-heading__meta {
-  display: grid;
-  justify-items: end;
-  gap: 6px;
-  color: #64748b;
-  font-size: 13px;
-}
-.sample-badge {
-  display: inline-flex;
-  align-items: center;
-  min-height: 26px;
-  padding: 2px 9px;
-  color: #52667b;
-  border: 1px solid #b9c7d5;
-  background: #f3f6f9;
-  font-size: 12px;
-  font-weight: 700;
-}
-.service-health {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.service-health i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #1b9b78;
-}
-.dashboard-metrics {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin: 16px 0;
-}
-.dashboard-metric {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 18px;
-  border: 1px solid var(--portal-border);
-  border-top: 3px solid var(--portal-blue);
-  background: #fff;
-}
-.dashboard-metric__icon {
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
-  color: var(--portal-blue);
-  background: #edf5fb;
-}
-.dashboard-metric__icon svg {
-  width: 20px;
-}
-.dashboard-metric small,
-.dashboard-metric strong {
-  display: block;
-}
-.dashboard-metric small {
-  color: var(--portal-muted);
-  font-size: 13px;
-}
-.dashboard-metric strong {
-  color: var(--portal-navy);
-  font-size: 26px;
-  line-height: 1.25;
-}
-.dashboard-metric em {
-  margin-left: 3px;
-  color: var(--portal-muted);
-  font-size: 13px;
-  font-style: normal;
-  font-weight: 500;
-}
-.dashboard-main-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 330px;
-  gap: 14px;
-}
-.dashboard-visuals {
-  display: grid;
-  grid-template-columns: 1.3fr 1fr;
-  gap: 14px;
-}
-.dashboard-panel {
-  border: 1px solid var(--portal-border);
-  background: #fff;
-}
-.dashboard-panel header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 16px 18px;
-  border-bottom: 1px solid var(--portal-border);
-}
-.dashboard-panel header span {
-  color: var(--portal-blue);
-  font-size: 12px;
-  font-weight: 750;
-}
-.dashboard-panel h2 {
-  margin: 2px 0 0;
-  color: var(--portal-navy);
-  font-size: 18px;
-}
-.dashboard-range {
-  display: flex;
-  gap: 0;
-}
-.dashboard-range button {
-  min-height: 30px;
-  padding: 3px 9px;
-  cursor: pointer;
-  color: #64748b;
-  border: 1px solid #c7d3df;
-  background: #fff;
-  font-size: 12px;
-}
-.dashboard-range button + button {
-  border-left: 0;
-}
-.dashboard-range button.active {
-  color: #fff;
-  border-color: var(--portal-blue);
-  background: var(--portal-blue);
-}
-.trend-chart {
-  height: 236px;
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
-  padding: 22px 18px 0;
-  border-bottom: 1px solid #e6ecf2;
-}
-.trend-column {
-  height: 100%;
-  display: grid;
-  flex: 1;
-  grid-template-rows: 18px 1fr 22px;
-  justify-items: center;
-  align-items: end;
-  color: #64748b;
-  font-size: 11px;
-}
-.trend-column strong {
-  color: var(--portal-blue);
-  font-size: 11px;
-}
-.trend-column i {
-  width: min(26px, 60%);
-  display: block;
-  background: var(--portal-blue);
-}
-.trend-column:nth-child(2n) i {
-  background: #3a91b2;
-}
-.trend-column small {
-  align-self: end;
-}
-.chart-note {
-  padding: 0 18px 13px;
-  margin: 0;
-  color: #8291a2;
-  font-size: 11px;
-}
-.panel-unit {
-  padding-top: 4px;
-  color: #64748b !important;
-  font-weight: 500 !important;
-}
-.distribution-list {
-  display: grid;
-  gap: 17px;
-  margin: 0;
-  padding: 21px 18px;
-  list-style: none;
-}
-.distribution-list li > div {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 6px;
-  color: #334155;
-  font-size: 13px;
-}
-.distribution-list strong {
-  color: var(--portal-navy);
-}
-.distribution-track {
-  height: 10px;
-  display: block;
-  overflow: hidden;
-  background: #e8eef4;
-}
-.distribution-track i {
-  height: 100%;
-  display: block;
-  background: var(--portal-green);
-}
-.dashboard-assistant {
-  min-height: 100%;
-  background: #fbfdff;
-}
-.dashboard-assistant header {
-  align-items: center;
-}
-.assistant-title {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-}
-.assistant-title > span {
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  color: #fff;
-  background: var(--portal-navy);
-}
-.assistant-title svg {
-  width: 18px;
-}
-.assistant-title h2 {
-  font-size: 17px;
-}
-.dashboard-assistant header > small {
-  padding-top: 4px;
-  color: #64748b;
-}
-.assistant-welcome {
-  padding: 15px 18px;
-  margin: 0;
-  color: #475569;
-  line-height: 1.55;
-  background: #f1f6fa;
-  font-size: 13px;
-}
-.assistant-cases {
-  display: grid;
-  gap: 7px;
-  padding: 14px 18px 12px;
-}
-.assistant-cases button {
-  padding: 8px 10px;
-  cursor: pointer;
-  text-align: left;
-  color: #334155;
-  border: 1px solid #d2dce6;
-  background: #fff;
-  font-size: 13px;
-  line-height: 1.45;
-}
-.assistant-cases button:hover,
-.assistant-cases button.active {
-  color: var(--portal-blue);
-  border-color: var(--portal-blue);
-  background: #f3f9fd;
-}
-.dashboard-assistant label {
-  display: block;
-  padding: 0 18px 6px;
-  color: #334155;
-  font-size: 13px;
-  font-weight: 700;
-}
-.assistant-input {
-  display: grid;
-  grid-template-columns: 1fr 38px;
-  gap: 6px;
-  padding: 0 18px;
-}
-.assistant-input input {
-  width: 100%;
-  min-height: 38px;
-  padding: 7px 9px;
-  border: 1px solid #afc0d1;
-  font: inherit;
-  font-size: 13px;
-}
-.assistant-input button {
-  width: 38px;
-  min-height: 38px;
-  cursor: pointer;
-  color: #fff;
-  border: 0;
-  background: var(--portal-blue);
-}
-.assistant-recommendation {
-  display: flex;
-  gap: 5px;
-  padding: 8px 18px 0;
-  margin: 0;
-  color: #805b00;
-  font-size: 12px;
-}
-.assistant-result {
-  display: grid;
-  gap: 5px;
-  padding: 14px 18px 18px;
-  margin-top: 14px;
-  border-top: 1px solid var(--portal-border);
-}
-.assistant-result small {
-  color: var(--portal-blue);
-}
-.assistant-result strong {
-  color: var(--portal-navy);
-}
-.assistant-result span {
-  color: #64748b;
-  font-size: 12px;
-  line-height: 1.5;
-}
-.assistant-result .portal-button {
-  min-height: 38px;
-  margin-top: 4px;
-  padding: 6px 12px;
-  font-size: 13px;
-}
-.dashboard-recent {
-  margin-top: 14px;
-}
-.dashboard-recent header {
-  align-items: center;
-}
-.recent-table {
-  width: 100%;
-  overflow-x: auto;
-}
-.recent-row {
-  min-width: 680px;
-  display: grid;
-  grid-template-columns: 2fr 1.15fr 1.1fr 80px;
-  gap: 12px;
-  align-items: center;
-  padding: 12px 18px;
-  border-bottom: 1px solid #e8edf2;
-  color: #475569;
-  font-size: 13px;
-}
-.recent-row:last-child {
-  border-bottom: 0;
-}
-.recent-row--head {
-  color: #64748b;
-  background: #f7f9fb;
-  font-size: 12px;
-}
-.recent-row strong {
-  color: #24364b;
-  font-weight: 650;
-}
-.case-status {
-  font-weight: 700;
-}
-.case-status.is-completed {
-  color: var(--portal-green);
-}
-.case-status.is-processing {
-  color: var(--portal-amber);
-}
-.case-status.is-failed {
-  color: var(--portal-red);
-}
-.dashboard-inline-error {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  margin: 16px 0;
-  color: #8f171e;
-  border: 1px solid #efc4c7;
-  background: #fff5f5;
-}
-.dashboard-inline-error button {
-  margin-left: auto;
-  min-height: 34px;
-  padding: 3px 11px;
-  cursor: pointer;
-  color: #8f171e;
-  border: 1px solid #d99ca0;
-  background: #fff;
-}
-.dashboard-loading {
-  padding: 32px;
-  text-align: center;
-  color: #64748b;
-  border: 1px solid var(--portal-border);
-  background: #fff;
-}
-@media (max-width: 1100px) {
-  .dashboard-main-grid {
-    grid-template-columns: 1fr;
-  }
-  .dashboard-assistant {
-    min-height: 0;
-  }
-  .dashboard-visuals {
-    grid-template-columns: 1.2fr 1fr;
-  }
+.portal-home-search { color: #17324d; border-bottom: 1px solid #cbd8e5; background: #edf4fa; }
+.portal-home-search__inner { min-height: 310px; display: flex; align-items: center; flex-direction: column; justify-content: center; padding-block: 44px 38px; text-align: center; }
+.portal-home-search__eyebrow { margin: 0 0 6px; color: var(--portal-blue); font-size: 15px; font-weight: 700; letter-spacing: .16em; }
+.portal-home-search h1 { margin: 0; color: var(--portal-navy-deep); font-size: clamp(28px, 3.2vw, 42px); line-height: 1.3; }
+.portal-home-search__lead { margin: 8px 0 22px; color: var(--portal-muted); font-size: 16px; }
+.portal-ai-search { width: min(860px, 100%); min-height: 62px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; border: 2px solid var(--portal-navy); border-radius: var(--portal-radius); background: #fff; }
+.portal-ai-search label { height: 34px; display: inline-flex; align-items: center; gap: 7px; padding-inline: 18px; color: var(--portal-navy); border-right: 1px solid var(--portal-border); font-weight: 750; white-space: nowrap; }
+.portal-ai-search label svg { width: 20px; height: 20px; }
+.portal-ai-search input { width: 100%; height: 58px; padding: 0 18px; color: var(--portal-text); border: 0; outline: 0; background: transparent; }
+.portal-ai-search button { min-width: 130px; height: 58px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; color: #fff; border: 0; background: var(--portal-navy); font-weight: 700; }
+.portal-ai-search button:hover { background: var(--portal-navy-deep); }
+.portal-hot-questions { width: min(860px, 100%); display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px 16px; margin-top: 14px; color: var(--portal-muted); font-size: 13px; }
+.portal-hot-questions > span { font-weight: 700; }
+.portal-hot-questions button { padding: 0; cursor: pointer; color: var(--portal-blue); border: 0; background: transparent; }
+.portal-hot-questions button:hover { text-decoration: underline; }
+.portal-home__body { padding-block: 26px 54px; }
+.portal-quick-actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--portal-border); background: #fff; }
+.portal-quick-actions > a { min-height: 106px; display: grid; grid-template-columns: 44px minmax(0, 1fr) 20px; gap: 13px; align-items: center; padding: 18px; border-right: 1px solid var(--portal-border); }
+.portal-quick-actions > a:last-child { border-right: 0; }
+.portal-quick-actions > a:hover { background: #f2f7fb; }
+.portal-quick-actions__icon { width: 44px; height: 44px; display: grid; place-items: center; color: #fff; background: var(--portal-navy); }
+.portal-quick-actions__icon svg { width: 23px; height: 23px; }
+.portal-quick-actions strong, .portal-quick-actions small { display: block; }
+.portal-quick-actions strong { color: var(--portal-navy-deep); font-size: 18px; }
+.portal-quick-actions small { margin-top: 3px; color: var(--portal-muted); font-size: 12px; }
+.portal-quick-actions__arrow { color: #7890a7; }
+.portal-home-section { padding-top: 34px; }
+.portal-home-section__heading, .portal-information-heading { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 16px; border-bottom: 1px solid var(--portal-border); }
+.portal-home-section__heading > div, .portal-information-heading > div { position: relative; }
+.portal-home-section__heading h2, .portal-information-heading h2 { margin: 0; padding: 0 2px 10px; color: var(--portal-navy-deep); font-size: 23px; }
+.portal-home-section__heading div > span, .portal-information-heading div > span { width: 48px; height: 3px; display: block; position: absolute; bottom: -1px; left: 0; background: var(--portal-red); }
+.portal-home-section__heading > a { display: inline-flex; align-items: center; gap: 5px; color: var(--portal-blue); font-size: 14px; }
+.portal-service-zones { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.portal-service-zones > a { min-height: 128px; display: grid; grid-template-columns: 42px minmax(0, 1fr) 18px; gap: 12px; align-items: center; padding: 20px 16px; border: 1px solid var(--portal-border); border-top: 3px solid var(--portal-blue); background: #fff; }
+.portal-service-zones > a:hover { border-color: #9fb7ce; background: #f8fbfd; }
+.portal-service-zones__icon { color: var(--portal-blue); }
+.portal-service-zones__icon svg { width: 34px; height: 34px; }
+.portal-service-zones h3 { margin: 0 0 6px; color: var(--portal-navy-deep); font-size: 17px; }
+.portal-service-zones p { margin: 0; color: var(--portal-muted); font-size: 12px; line-height: 1.6; }
+.portal-service-zones__arrow { color: #7890a7; }
+.portal-information-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.portal-information-grid article { padding: 20px 22px 14px; border: 1px solid var(--portal-border); background: #fff; }
+.portal-information-heading small { align-self: flex-start; padding: 3px 8px; color: #5f7081; border: 1px solid #c9d4df; background: #f5f7f9; font-size: 12px; }
+.portal-information-grid ul { margin: 0; padding: 0; list-style: none; }
+.portal-information-grid li { border-bottom: 1px dashed #d9e1e9; }
+.portal-information-grid li:last-child { border-bottom: 0; }
+.portal-information-grid li a { min-height: 45px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; font-size: 14px; }
+.portal-information-grid li a:hover span { color: var(--portal-blue); }
+.portal-information-grid time { color: #748596; font-size: 12px; }
+.portal-information-note { margin: 10px 0 0; color: #738292; font-size: 12px; }
+.portal-information-loading, .portal-information-error { min-height: 190px; display: flex; align-items: center; justify-content: center; gap: 14px; color: var(--portal-muted); border: 1px solid var(--portal-border); background: #fff; }
+.portal-information-error button { min-height: 36px; padding: 5px 14px; cursor: pointer; color: #fff; border: 0; background: var(--portal-navy); }
+@media (max-width: 1024px) {
+  .portal-quick-actions { grid-template-columns: repeat(2, 1fr); }
+  .portal-quick-actions > a:nth-child(2) { border-right: 0; }
+  .portal-quick-actions > a:nth-child(-n + 2) { border-bottom: 1px solid var(--portal-border); }
+  .portal-service-zones { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 768px) {
-  .dashboard-heading {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-  .dashboard-heading__meta {
-    justify-items: start;
-  }
-  .dashboard-metrics {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .dashboard-visuals {
-    grid-template-columns: 1fr;
-  }
-  .dashboard-main-grid {
-    gap: 12px;
-  }
+  .portal-home-search__inner { min-height: 270px; padding-block: 34px 28px; }
+  .portal-ai-search { grid-template-columns: 1fr auto; }
+  .portal-ai-search label { grid-column: 1 / -1; height: 34px; justify-content: center; border-right: 0; border-bottom: 1px solid var(--portal-border); }
+  .portal-ai-search input, .portal-ai-search button { height: 50px; }
+  .portal-information-grid { grid-template-columns: 1fr; }
 }
-@media (max-width: 560px) {
-  .portal-dashboard-home {
-    padding-top: 22px;
-  }
-  .dashboard-heading h1 {
-    font-size: 28px;
-  }
-  .dashboard-metrics {
-    gap: 8px;
-  }
-  .dashboard-metric {
-    align-items: flex-start;
-    flex-direction: column;
-    padding: 12px;
-  }
-  .dashboard-metric strong {
-    font-size: 22px;
-  }
-  .dashboard-metric__icon {
-    width: 34px;
-    height: 34px;
-  }
-  .dashboard-panel header {
-    padding: 14px;
-  }
-  .trend-chart {
-    height: 210px;
-    padding-inline: 10px;
-    gap: 4px;
-  }
-  .trend-column i {
-    width: 18px;
-  }
-  .dashboard-range button {
-    padding-inline: 6px;
-  }
-  .recent-row {
-    padding-inline: 14px;
-  }
+@media (max-width: 520px) {
+  .portal-home-search__lead { font-size: 14px; }
+  .portal-ai-search { grid-template-columns: minmax(0, 1fr) 48px; }
+  .portal-ai-search input { padding-inline: 12px; font-size: 13px; }
+  .portal-ai-search button { min-width: 48px; font-size: 0; }
+  .portal-ai-search button svg { width: 20px; height: 20px; }
+  .portal-quick-actions, .portal-service-zones { grid-template-columns: 1fr; }
+  .portal-quick-actions > a { border-right: 0; border-bottom: 1px solid var(--portal-border); }
+  .portal-quick-actions > a:last-child { border-bottom: 0; }
+  .portal-service-zones > a { min-height: 106px; }
+  .portal-information-grid article { padding-inline: 15px; }
+  .portal-information-grid li a { grid-template-columns: 1fr; gap: 1px; padding-block: 8px; }
 }
 </style>
