@@ -19,7 +19,7 @@ import PortalAssistant from "@/views/portal/components/PortalAssistant.vue";
       <nav class="portal-nav" aria-label="主导航">
         <div class="portal-container portal-nav__inner">
           <RouterLink to="/portal/home">首页</RouterLink>
-          <RouterLink to="/portal/scenarios">通用 AI 能力</RouterLink>
+          <RouterLink to="/portal/documents">智能文档解析</RouterLink>
           <RouterLink to="/portal/precheck">出口合规预检</RouterLink>
           <RouterLink to="/portal/scenarios">场景 Demo</RouterLink>
           <RouterLink to="/portal/diagnosis">数智化诊断</RouterLink>

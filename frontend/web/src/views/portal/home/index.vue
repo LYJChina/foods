@@ -19,6 +19,7 @@ import { coverageItems, portalMetrics, portalServices } from "../content";
               开始出口合规预检 <Icon icon="ri:arrow-right-line" aria-hidden="true" />
             </RouterLink>
             <RouterLink class="portal-button portal-button--secondary" to="/portal/scenarios">查看场景 Demo</RouterLink>
+            <RouterLink class="portal-button portal-button--secondary" to="/portal/documents">智能文档解析</RouterLink>
           </div>
         </div>
         <aside class="portal-hero__boundary" aria-label="数据边界说明">

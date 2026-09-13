@@ -9,9 +9,9 @@ export interface PortalService {
 
 export const portalServices: PortalService[] = [
   {
-    title: "通用 AI 能力服务",
-    description: "文档解析、多语言辅助、公共知识检索等低门槛能力演示。",
-    action: "查看能力",
+    title: "智能文档解析与问答",
+    description: "上传公开或低敏文档，使用 MinerU 解析并基于原文引用进行问答。",
+    action: "上传文档",
     to: "/portal/documents",
     icon: "ri:sparkling-2-line",
     tone: "blue",
