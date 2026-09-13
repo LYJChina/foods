@@ -1,4 +1,5 @@
 from collections.abc import Mapping
+from math import isfinite
 from typing import Any
 
 import httpx
@@ -136,9 +137,12 @@ class MinerUClient:
     @classmethod
     def _bounded_timeout(cls, timeout: float) -> float:
         try:
-            return min(max(float(timeout), cls._MIN_TIMEOUT_SECONDS), cls._MAX_TIMEOUT_SECONDS)
+            numeric_timeout = float(timeout)
         except (TypeError, ValueError):
             return cls._MIN_TIMEOUT_SECONDS
+        if not isfinite(numeric_timeout):
+            return cls._MIN_TIMEOUT_SECONDS
+        return min(max(numeric_timeout, cls._MIN_TIMEOUT_SECONDS), cls._MAX_TIMEOUT_SECONDS)
 
     @staticmethod
     def _require_nonempty_string(payload: Mapping[str, Any], field: str) -> None:

@@ -5,6 +5,20 @@ from app.plugin.food_ai.mineru_client import MinerUClient, MinerUInvalidResponse
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("invalid_timeout", [float("nan"), float("inf"), float("-inf")])
+async def test_client_replaces_non_finite_timeout_with_bounded_default(invalid_timeout: float) -> None:
+    client = MinerUClient("http://mineru.internal", None, invalid_timeout, transport=httpx.MockTransport(lambda request: None))
+    try:
+        assert client.timeout == 1.0
+        assert client._client.timeout.connect == 1.0
+        assert client._client.timeout.read == 1.0
+        assert client._client.timeout.write == 1.0
+        assert client._client.timeout.pool == 1.0
+    finally:
+        await client.aclose()
+
+
+@pytest.mark.asyncio
 async def test_submit_sends_required_multipart_fields_and_optional_service_token() -> None:
     requests: list[httpx.Request] = []
 
