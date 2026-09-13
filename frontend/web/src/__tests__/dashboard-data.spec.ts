@@ -18,11 +18,15 @@ describe("dashboard data adapter", () => {
 
   it("returns an isolated snapshot copy for each request", async () => {
     const first = await DashboardAPI.getSnapshot();
+    const firstCase = first.recent_cases[0];
+    expect(firstCase).toBeDefined();
     first.summary.total_handled = 0;
-    first.recent_cases[0].title = "mutated sample";
+    firstCase!.title = "mutated sample";
 
     const second = await DashboardAPI.getSnapshot();
+    const secondCase = second.recent_cases[0];
+    expect(secondCase).toBeDefined();
     expect(second.summary.total_handled).toBe(1286);
-    expect(second.recent_cases[0].title).not.toBe("mutated sample");
+    expect(secondCase!.title).not.toBe("mutated sample");
   });
 });
