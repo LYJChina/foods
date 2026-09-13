@@ -12,6 +12,7 @@ from fastapi import UploadFile, status
 from app.config.setting import settings
 from app.core.exceptions import CustomException
 
+from .document_answerer import AnswererUnavailable, DocumentAnswerer
 from .document_processing import count_pdf_pages, extract_chunks, sanitize_file_name, validate_upload
 from .document_repository import DocumentRepository
 from .document_schema import DocumentRecord, DocumentStatus
@@ -19,10 +20,11 @@ from .mineru_client import MinerUClient, MinerUInvalidResponse, MinerUUnavailabl
 
 
 class DocumentService:
-    def __init__(self, repository: DocumentRepository, mineru: MinerUClient, storage_dir: Path | None = None) -> None:
+    def __init__(self, repository: DocumentRepository, mineru: MinerUClient, storage_dir: Path | None = None, answerer: DocumentAnswerer | None = None) -> None:
         self.repository = repository
         self.mineru = mineru
         self.storage_dir = storage_dir or settings.DOCUMENT_STORAGE_DIR
+        self.answerer = answerer
 
     async def create(self, file: UploadFile, confirmed_low_sensitivity: bool) -> DocumentRecord:
         content = await self._read_limited(file)
@@ -90,6 +92,21 @@ class DocumentService:
         record = self._require_document(document_id)
         self.repository.delete_document(document_id)
         Path(record.storage_path).unlink(missing_ok=True)
+
+    async def question(self, document_id: str, question: str):
+        record = self._require_document(document_id)
+        if record.status is not DocumentStatus.READY:
+            raise CustomException(msg="文档尚未解析完成，暂不可问答。", status_code=status.HTTP_409_CONFLICT)
+        if not question.strip():
+            raise CustomException(msg="问题不能为空。", status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        if self.answerer is None:
+            raise CustomException(msg="问答模型服务未配置或暂不可用。", status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
+        chunks = self.repository.search_chunks(document_id, question, limit=5)
+        try:
+            result = await self.answerer.answer(document_id, record.original_filename, question.strip(), chunks)
+        except AnswererUnavailable:
+            raise CustomException(msg="问答模型服务未配置或暂不可用。", status_code=status.HTTP_503_SERVICE_UNAVAILABLE) from None
+        return self.repository.save_question(result)
 
     async def _read_limited(self, file: UploadFile) -> bytes:
         chunks: list[bytes] = []

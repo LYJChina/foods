@@ -2,12 +2,14 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, File, Form, Path, Query, UploadFile, status
+from fastapi import APIRouter, Body, File, Form, Path, Query, UploadFile, status
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
 
 from app.common.response import SuccessResponse
 from app.config.setting import settings
 
+from .document_answerer import configured_answerer
 from .document_repository import DocumentRepository
 from .document_service import DocumentService
 from .mineru_client import MinerUClient
@@ -15,7 +17,11 @@ from .mineru_client import MinerUClient
 DocumentRouter = APIRouter(prefix="/food-ai/documents", tags=["食品行业 AI 文档解析 Demo"])
 _repository = DocumentRepository(settings.DOCUMENT_STORAGE_DIR / "documents.db")
 _mineru = MinerUClient(settings.MINERU_URL, settings.MINERU_TOKEN, settings.DOCUMENT_LLM_TIMEOUT_SECONDS)
-document_service = DocumentService(_repository, _mineru)
+document_service = DocumentService(_repository, _mineru, answerer=configured_answerer())
+
+
+class QuestionRequest(BaseModel):
+    question: str = Field(min_length=1, max_length=4000)
 
 
 def _payload(record, public_status: str) -> dict[str, object]:
@@ -43,3 +49,9 @@ async def get_content(document_id: Annotated[str, Path(min_length=1, max_length=
 async def delete_document(document_id: Annotated[str, Path(min_length=1, max_length=128)]) -> JSONResponse:
     await document_service.delete(document_id)
     return SuccessResponse(data={"document_id": document_id}, msg="文档已删除")
+
+
+@DocumentRouter.post("/{document_id}/questions")
+async def ask_document(document_id: Annotated[str, Path(min_length=1, max_length=128)], data: Annotated[QuestionRequest, Body()]) -> JSONResponse:
+    result = await document_service.question(document_id, data.question)
+    return SuccessResponse(data={"answer": result.answer, "citations": result.citations, "insufficient_evidence": not result.citations, "model_label": "后端配置模型", "disclaimer": "AI 生成，仅供辅助阅读。"}, msg="问答完成")
