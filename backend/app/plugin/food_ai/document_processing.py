@@ -8,6 +8,7 @@ from io import BytesIO
 from pathlib import Path
 from typing import Any, BinaryIO
 from uuid import uuid4
+from zipfile import BadZipFile, ZipFile
 
 from pypdf import PdfReader
 from pypdf.errors import PdfReadError
@@ -19,6 +20,7 @@ MAX_CHUNK_CHARACTERS = 1200
 CHUNK_OVERLAP_CHARACTERS = 80
 
 _PAGE_MARKER = re.compile(r"^(?:第\s*\d+\s*页|page\s*\d+)$", re.IGNORECASE)
+_PAGE_FURNITURE_TYPES = {"header", "footer", "page_header", "page_footer"}
 _SUPPORTED_TYPES = {
     ".pdf": ("application/pdf", (b"%PDF-",)),
     ".docx": (
@@ -55,6 +57,8 @@ def validate_upload(
         raise ValueError("文件类型与扩展名不匹配或不受支持。")
     if not isinstance(header, bytes) or not any(header.startswith(signature) for signature in type_definition[1]):
         raise ValueError("文件内容与声明的类型不匹配。")
+    if suffix in {".docx", ".pptx"} and not _is_expected_ooxml(header, suffix):
+        raise ValueError("文件内容与声明的类型不匹配。")
     return ".jpg" if suffix == ".jpeg" else suffix
 
 
@@ -85,7 +89,6 @@ def extract_chunks(mineru_result: Mapping[str, Any]) -> list[DocumentChunk]:
     document_id = str(mineru_result.get("document_id") or "document")
     content_list = _find_content_list(mineru_result)
     entries = _text_entries(content_list)
-    repeated = _repeated_page_furniture(entries)
 
     chunks: list[DocumentChunk] = []
     heading_levels: dict[int, str] = {}
@@ -98,11 +101,13 @@ def extract_chunks(mineru_result: Mapping[str, Any]) -> list[DocumentChunk]:
                 if obsolete_level > level:
                     del heading_levels[obsolete_level]
             continue
-        if _is_page_furniture(text, repeated):
+        if _is_page_furniture(entry["type"], text):
             continue
-        heading = " / ".join(heading_levels[level] for level in sorted(heading_levels)) or None
+        heading = _heading_path(heading_levels)
         page_number = entry["page"] + 1 if entry["page"] is not None else None
         for part in _split_text(text):
+            if len(chunks) >= settings.DOCUMENT_MAX_CHUNKS:
+                raise ValueError("解析结果无效。")
             chunks.append(
                 DocumentChunk(
                     document_id=document_id,
@@ -113,6 +118,16 @@ def extract_chunks(mineru_result: Mapping[str, Any]) -> list[DocumentChunk]:
                 )
             )
     return chunks
+
+
+def _is_expected_ooxml(content: bytes, suffix: str) -> bool:
+    required_part = "word/document.xml" if suffix == ".docx" else "ppt/presentation.xml"
+    try:
+        with ZipFile(BytesIO(content)) as archive:
+            members = set(archive.namelist())
+    except (BadZipFile, OSError):
+        return False
+    return "[Content_Types].xml" in members and required_part in members
 
 
 def _find_content_list(result: Mapping[str, Any]) -> Sequence[Mapping[str, Any]]:
@@ -141,19 +156,8 @@ def _text_entries(content_list: Sequence[Mapping[str, Any]]) -> list[dict[str, A
     return entries
 
 
-def _repeated_page_furniture(entries: Sequence[Mapping[str, Any]]) -> set[str]:
-    pages_by_text: dict[str, set[int]] = {}
-    for entry in entries:
-        if _is_title(str(entry["type"])):
-            continue
-        page = entry["page"]
-        if page is not None:
-            pages_by_text.setdefault(str(entry["text"]), set()).add(page)
-    return {text for text, pages in pages_by_text.items() if len(pages) > 1}
-
-
-def _is_page_furniture(text: str, repeated: set[str]) -> bool:
-    return text in repeated or bool(_PAGE_MARKER.fullmatch(text))
+def _is_page_furniture(item_type: str, text: str) -> bool:
+    return item_type in _PAGE_FURNITURE_TYPES or bool(_PAGE_MARKER.fullmatch(text))
 
 
 def _is_title(item_type: str) -> bool:
@@ -162,6 +166,11 @@ def _is_title(item_type: str) -> bool:
 
 def _heading_level(value: object) -> int:
     return value if isinstance(value, int) and value > 0 else 1
+
+
+def _heading_path(heading_levels: Mapping[int, str]) -> str | None:
+    heading = " / ".join(heading_levels[level] for level in sorted(heading_levels))
+    return heading[:500] or None
 
 
 def _split_text(text: str) -> list[str]:
