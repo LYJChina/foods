@@ -72,9 +72,7 @@ onMounted(load);
   <main class="portal-page portal-dashboard-home portal-container">
     <header class="dashboard-heading">
       <div>
-        <span class="portal-section__kicker">公共服务 AI 中台</span>
         <h1>运行概况</h1>
-        <p>面向食品行业提供可查、可办、可追踪的公共智能服务。</p>
       </div>
       <div class="dashboard-heading__meta">
         <span class="sample-badge">示例数据</span
@@ -224,7 +222,7 @@ onMounted(load);
 
 <style scoped lang="scss">
 .portal-dashboard-home {
-  padding-top: 34px;
+  padding-top: 26px;
   padding-bottom: 56px;
 }
 .dashboard-heading {
@@ -232,11 +230,11 @@ onMounted(load);
   justify-content: space-between;
   align-items: flex-end;
   gap: 24px;
-  padding-bottom: 20px;
+  padding-bottom: 14px;
   border-bottom: 2px solid var(--portal-navy);
 }
 .dashboard-heading h1 {
-  margin: 4px 0 3px;
+  margin: 0;
   font-size: 32px;
   color: var(--portal-navy);
 }
