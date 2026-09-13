@@ -1,17 +1,18 @@
 :root {
-  --portal-navy: #0f3568;
-  --portal-navy-deep: #08284f;
-  --portal-blue: #0369a1;
+  --portal-navy: #174b82;
+  --portal-navy-deep: #123d6b;
+  --portal-blue: #2f6fb2;
   --portal-cyan: #0e7490;
   --portal-green: #147d64;
   --portal-amber: #a16207;
   --portal-red: #b4232b;
-  --portal-bg: #f3f6fa;
+  --portal-bg: #f4f7fa;
   --portal-card: #ffffff;
-  --portal-text: #0f172a;
-  --portal-muted: #475569;
-  --portal-border: #d9e2ec;
+  --portal-text: #172b3f;
+  --portal-muted: #526477;
+  --portal-border: #d6e0e9;
   --portal-ring: #f4b942;
+  --portal-radius: 2px;
 }
 
 .portal-layout {
@@ -38,6 +39,8 @@
 .portal-header { color: #fff; background: var(--portal-navy); border-bottom: 3px solid #dca72c; }
 .portal-utility-bar { color: #d8e7f7; background: var(--portal-navy-deep); font-size: 13px; }
 .portal-utility-bar__inner { min-height: 30px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.portal-utility-bar__links { display: inline-flex; align-items: center; gap: 18px; }
+.portal-utility-bar__links a:hover { color: #fff; text-decoration: underline; }
 .portal-header__brand-row { min-height: 88px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .portal-brand { min-height: 64px; display: inline-flex; align-items: center; gap: 14px; }
 .portal-brand__mark { width: 52px; height: 52px; display: grid; place-items: center; flex: none; border: 2px solid rgba(255,255,255,.74); border-radius: 2px; background: #b4232b; box-shadow: inset 0 0 0 4px rgba(255,255,255,.1); }
