@@ -237,6 +237,20 @@ class Settings(BaseSettings):
     OPENAI_BASE_URL: str = ""  # API Base URL，如 https://api.minimax.chat/v1
 
     # ================================================= #
+    # ************** 文档解析与问答（可选）************* #
+    # ================================================= #
+    MINERU_URL: str = "http://127.0.0.1:8002"
+    MINERU_TOKEN: str = ""
+    DOCUMENT_STORAGE_DIR: Path = Path("static/upload/documents")
+    DOCUMENT_RETENTION_DAYS: int = 7
+    DOCUMENT_MAX_UPLOAD_BYTES: int = 20 * 1024 * 1024
+    DOCUMENT_MAX_CHUNKS: int = 200
+    DOCUMENT_LLM_BASE_URL: str = ""
+    DOCUMENT_LLM_MODEL: str = ""
+    DOCUMENT_LLM_API_KEY: str = ""
+    DOCUMENT_LLM_TIMEOUT_SECONDS: float = 30.0
+
+    # ================================================= #
     # ******************* 动态配置 ******************* #
     # ================================================= #
     @property
