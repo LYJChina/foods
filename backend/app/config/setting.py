@@ -241,7 +241,7 @@ class Settings(BaseSettings):
     # ================================================= #
     MINERU_URL: str = "http://127.0.0.1:8002"
     MINERU_TOKEN: str = ""
-    DOCUMENT_STORAGE_DIR: Path = Path("static/upload/documents")
+    DOCUMENT_STORAGE_DIR: Path = Path("data/documents")
     DOCUMENT_RETENTION_DAYS: int = 1
     DOCUMENT_MAX_UPLOAD_BYTES: int = 20 * 1024 * 1024
     DOCUMENT_MAX_PAGES: int = 100

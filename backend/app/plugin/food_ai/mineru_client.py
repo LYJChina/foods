@@ -47,6 +47,7 @@ class MinerUClient:
                 pool=self.timeout,
             ),
             transport=transport,
+            trust_env=False,
         )
 
     async def __aenter__(self) -> "MinerUClient":

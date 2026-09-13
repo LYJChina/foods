@@ -28,6 +28,7 @@ from app.modules.task.storage.node.controller import StorageNodeRouter
 from app.modules.task.storage.transfer.controller import StorageTransferRouter
 from app.modules.task.storage.workflow.controller import StorageWorkflowRouter
 from app.plugin.food_ai.controller import FoodAIRouter
+from app.plugin.food_ai.document_controller import DocumentRouter
 
 # 域前缀 → 该域 controller 清单（唯一路由事实来源）
 DOMAIN_CONTROLLERS: dict[str, list[APIRouter]] = {
@@ -62,7 +63,7 @@ DOMAIN_CONTROLLERS: dict[str, list[APIRouter]] = {
     "/ai": [ChatRouter],
     "/generator": [GenRouter],
     "/common": [FileRouter],
-    "": [FoodAIRouter],
+    "": [FoodAIRouter, DocumentRouter],
 }
 
 api_v1 = APIRouter()
