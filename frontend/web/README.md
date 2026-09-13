@@ -23,13 +23,15 @@ pnpm install
 pnpm dev
 ```
 
-默认开发端口由 **`.env`** 中的 **`VITE_PORT`** 决定（当前模板为 **5173**）。
+默认开发端口由 **`.env`** 中的 **`VITE_PORT`** 决定（当前项目为 **5180**）。公共门户入口为 `http://127.0.0.1:5180/web/#/portal/home`，无需登录。
 
 ### 与后端联调
 
 1. 先启动 **FastAPI Admin 后端**，监听地址与 **`.env.dev`** 里 **`VITE_API_BASE_URL`** 一致（模板默认为 **`http://127.0.0.1:8001`**）。
 2. 前端开发时，浏览器请求发往当前页面同源路径，由 **Vite `server.proxy`** 把 **`VITE_APP_BASE_API`**（如 `/api/v1`）转发到上述后端。
 3. 若页面提示「连接被拒绝」，检查后端是否启动、端口是否一致，或把 **`VITE_API_BASE_URL`** 改成你的实际后端地址。
+
+公共服务智能问答只请求平台后端 `/food-ai/assistant/questions`。模型地址、模型名称和 API key 均由 FastAPI 后端环境变量管理，任何 `VITE_` 变量都不得保存模型 API key。
 
 ## 架构概览
 

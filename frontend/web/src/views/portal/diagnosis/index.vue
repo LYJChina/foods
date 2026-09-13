@@ -68,7 +68,7 @@ async function submitDiagnosis(): Promise<void> {
     <header class="portal-page__intro">
       <span class="portal-section__kicker">下一步路径判断</span>
       <h1>企业数智化轻量诊断</h1>
-      <p>用 5 个基础问题形成 Demo 建议，并将需求分为公共平台、轻量 POC 和企业专项建设三类。</p>
+      <p>用 5 个基础问题形成辅助建议，并将需求分为公共平台、轻量 POC 和企业专项建设三类。</p>
     </header>
 
     <div class="portal-diagnosis-layout">
@@ -84,7 +84,7 @@ async function submitDiagnosis(): Promise<void> {
           </div>
         </fieldset>
         <button type="submit" class="portal-button portal-button--primary portal-diagnosis-submit" :disabled="isSubmitting">
-          {{ isSubmitting ? "正在生成诊断…" : "生成 Demo 诊断建议" }}
+          {{ isSubmitting ? "正在生成诊断…" : "生成诊断建议" }}
         </button>
       </form>
 
@@ -92,17 +92,17 @@ async function submitDiagnosis(): Promise<void> {
         <Icon icon="ri:information-line" aria-hidden="true" />
         <h2>诊断范围</h2>
         <p>仅使用当前选择的 0—2 分答案，不采集企业名称、经营指标、客户、订单、配方或生产数据。</p>
-        <p>评分用于演示需求分流逻辑，不构成项目评估或采购依据。</p>
+        <p>评分用于辅助判断需求分流，不构成项目评估或采购依据。</p>
       </aside>
     </div>
 
     <section v-if="result" class="portal-diagnosis-result" aria-live="polite">
       <div class="portal-diagnosis-result__heading">
-        <div><span class="portal-data-label">简化规则 Demo</span><h2>{{ maturityLabels[result.maturity] }}</h2></div>
+        <div><span class="portal-data-label">简化辅助规则</span><h2>{{ maturityLabels[result.maturity] }}</h2></div>
         <div class="portal-score"><strong>{{ result.score }}</strong><span>/ 10 分</span></div>
       </div>
       <div class="portal-score-track" aria-hidden="true"><i :style="{ width: scorePercent + '%' }"></i></div>
-      <p v-if="usedLocalFallback" class="portal-local-fallback">后端暂不可用，当前显示浏览器本地确定性 Demo 规则结果。</p>
+      <p v-if="usedLocalFallback" class="portal-local-fallback">后端暂不可用，当前显示浏览器本地确定性辅助规则结果。</p>
       <div class="portal-recommendations">
         <article v-for="(items, key) in result.recommendations" :key="key">
           <Icon :icon="recommendationMeta[key].icon" aria-hidden="true" />

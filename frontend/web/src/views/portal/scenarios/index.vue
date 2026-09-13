@@ -7,7 +7,7 @@ const scenarios = [
     icon: "ri:file-text-line",
     description: "文档解析、翻译、知识问答与会议报告辅助的交互流程。",
     boundary: "不连接企业办公系统，不处理真实企业文件。",
-    status: "流程 Demo",
+    status: "辅助展示",
     tone: "blue",
   },
   {
@@ -15,7 +15,7 @@ const scenarios = [
     icon: "ri:flask-line",
     description: "行业公开知识、新品趋势、历史产品检索与法规校核示意。",
     boundary: "不接收配方比例、工艺参数等核心研发数据。",
-    status: "模拟数据",
+    status: "辅助展示",
     tone: "violet",
   },
   {
@@ -23,7 +23,7 @@ const scenarios = [
     icon: "ri:building-4-line",
     description: "排产建议、生产进度、设备诊断和损耗分析的流程示意。",
     boundary: "不连接 MES、设备或实时生产数据。",
-    status: "模拟数据",
+    status: "辅助展示",
     tone: "cyan",
   },
   {
@@ -31,7 +31,7 @@ const scenarios = [
     icon: "ri:scan-2-line",
     description: "视觉质检、包装检测、标签识别与异常分析。",
     boundary: "当前不提供真实视觉模型或检测结论。",
-    status: "规划能力",
+    status: "规划中",
     tone: "red",
   },
   {
@@ -39,7 +39,7 @@ const scenarios = [
     icon: "ri:global-line",
     description: "客户文件解析、多语言资料与海外合规辅助流程。",
     boundary: "不使用真实客户文件，不代替专业合规判断。",
-    status: "流程 Demo",
+    status: "辅助展示",
     tone: "green",
   },
   {
@@ -47,7 +47,7 @@ const scenarios = [
     icon: "ri:bar-chart-box-line",
     description: "知识助手、经营问数与企业 Agent 协同的闭环示意。",
     boundary: "经营数据留在企业侧，公共平台不获取超级权限。",
-    status: "模拟数据",
+    status: "辅助展示",
     tone: "amber",
   },
 ];
@@ -57,7 +57,7 @@ const scenarios = [
   <main class="portal-page portal-container">
     <header class="portal-page__intro">
       <span class="portal-section__kicker">先看见，再验证</span>
-      <h1>AI 场景 Demo 展示墙</h1>
+      <h1>AI 场景服务专区</h1>
       <p>优先展示企业感知强、能说明实施条件与价值边界的场景；当前状态均按真实实现程度标注。</p>
     </header>
 
@@ -80,7 +80,7 @@ const scenarios = [
       <div>
         <span class="portal-section__kicker">从共性服务开始</span>
         <h2>体验可运行的出口合规预检流程</h2>
-        <p>使用产品类别、目标市场和低敏材料类型生成确定性 Demo 结果。</p>
+        <p>使用产品类别、目标市场和低敏材料类型生成确定性辅助结果。</p>
       </div>
       <RouterLink class="portal-button portal-button--primary" to="/portal/precheck">开始预检</RouterLink>
     </section>

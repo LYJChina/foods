@@ -78,9 +78,15 @@ describe("portal homepage", () => {
     expect(router.currentRoute.value.fullPath).toBe("/portal/assistant");
   });
 
-  it("lists the canonical public service catalog with its real availability state", () => {
+  it("lists the canonical public service catalog with its real availability state", async () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: "/portal/services", component: PortalServices }],
+    });
+    await router.push("/portal/services");
+    await router.isReady();
     const wrapper = mount(PortalServices, {
-      global: { stubs: { RouterLink: RouterLinkStub } },
+      global: { plugins: [router] },
     });
 
     expect(wrapper.text()).toContain("智能文档解析");

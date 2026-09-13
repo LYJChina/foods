@@ -50,7 +50,7 @@ def test_missing_precheck_returns_not_found(test_client: TestClient) -> None:
     assert response.json()["msg"] == "预检任务不存在"
 
 
-def test_portal_summary_is_explicitly_demo_data(test_client: TestClient) -> None:
+def test_portal_summary_is_explicitly_sample_data(test_client: TestClient) -> None:
     response = test_client.get("/food-ai/portal/summary")
 
     assert response.status_code == 200
@@ -60,7 +60,7 @@ def test_portal_summary_is_explicitly_demo_data(test_client: TestClient) -> None
         "output_mode_count": 2,
         "diagnosis_class_count": 3,
         "is_demo": True,
-        "data_label": "演示数据，非实时统计",
+        "data_label": "样例数据，非实时统计",
     }
 
 

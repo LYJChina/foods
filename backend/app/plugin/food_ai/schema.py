@@ -61,7 +61,7 @@ class PortalSummary(BaseModel):
     output_mode_count: Literal[2] = 2
     diagnosis_class_count: Literal[3] = 3
     is_demo: Literal[True] = True
-    data_label: str = "演示数据，非实时统计"
+    data_label: str = "样例数据，非实时统计"
 
 
 class DiagnosisCreate(BaseModel):

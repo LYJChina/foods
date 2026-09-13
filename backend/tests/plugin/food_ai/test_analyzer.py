@@ -21,7 +21,7 @@ def test_valid_sample_returns_structured_demo_result() -> None:
 
     assert result.overall == "needs_review"
     assert result.is_demo is True
-    assert result.source_labels == ["Demo 规则集（非实时法规库）"]
+    assert result.source_labels == ["辅助规则集（非实时法规库）"]
     assert result.disclaimer == "仅用于辅助预检，不替代专业认证、检验或法律判断。"
     assert len(result.risks) >= 1
 

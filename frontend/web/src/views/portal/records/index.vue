@@ -40,7 +40,7 @@ onMounted(async () => {
       <header class="portal-page__intro">
         <span class="portal-section__kicker">公共服务办理信息</span>
         <h1>办理记录</h1>
-        <p>以下为平台演示数据，用于说明公共服务办理流程，不对应真实企业或个人事项。</p>
+        <p>以下为平台样例数据，用于说明公共服务办理流程，不对应真实企业或个人事项。</p>
       </header>
 
       <p v-if="isLoading" class="portal-records-empty" role="status">正在加载示例办理记录…</p>

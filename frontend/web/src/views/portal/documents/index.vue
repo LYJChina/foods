@@ -466,8 +466,8 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
   align-items: center;
   padding: 24px 26px;
   color: #fff;
-  border-radius: 14px;
-  background: linear-gradient(118deg, var(--portal-navy-deep), var(--portal-navy) 62%, #155f7b);
+  border-radius: 2px;
+  background: #edf4fa;
   box-shadow: 0 8px 24px rgba(8, 40, 79, 0.12);
 }
 .document-labels {
@@ -477,7 +477,7 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
 .document-labels span {
   padding: 3px 10px;
   border: 1px solid rgba(255, 255, 255, 0.34);
-  border-radius: 999px;
+  border-radius: 2px;
   background: rgba(255, 255, 255, 0.1);
   font-size: 13px;
   font-weight: 750;
@@ -497,7 +497,7 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
   padding: 16px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-left: 4px solid #70d7bd;
-  border-radius: 10px;
+  border-radius: 2px;
   background: rgba(255, 255, 255, 0.09);
 }
 .document-boundary > svg {
@@ -523,7 +523,7 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
   padding: 16px 18px;
   margin: 16px 0;
   border: 1px solid var(--portal-border);
-  border-radius: 12px;
+  border-radius: 2px;
   background: #fff;
 }
 .document-status {
@@ -538,7 +538,7 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
   place-items: center;
   flex: none;
   color: #475569;
-  border-radius: 10px;
+  border-radius: 2px;
   background: #eef2f6;
 }
 .document-status strong,
@@ -622,7 +622,7 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
   cursor: pointer;
   color: var(--portal-blue);
   border: 0;
-  border-radius: 7px;
+  border-radius: 2px;
   background: transparent;
   font-weight: 650;
   white-space: nowrap;
@@ -643,7 +643,7 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
   margin-bottom: 16px;
   color: #8f171e;
   border: 1px solid #efc4c7;
-  border-radius: 10px;
+  border-radius: 2px;
   background: #fff5f5;
 }
 .document-error button {
@@ -651,7 +651,7 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
   cursor: pointer;
   color: #8f171e;
   border: 1px solid #d99ca0;
-  border-radius: 7px;
+  border-radius: 2px;
   background: #fff;
 }
 .document-upload-layout {
@@ -666,7 +666,7 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
 .document-preview-card,
 .document-qa-card {
   border: 1px solid var(--portal-border);
-  border-radius: 12px;
+  border-radius: 2px;
   background: #fff;
 }
 .document-upload-card {
@@ -687,7 +687,7 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
   place-items: center;
   flex: none;
   color: #fff;
-  border-radius: 10px;
+  border-radius: 2px;
   background: var(--portal-blue);
 }
 .document-card-heading h2,
@@ -714,7 +714,7 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
   padding: 24px;
   cursor: pointer;
   border: 1px dashed #8da8c3;
-  border-radius: 10px;
+  border-radius: 2px;
   background: #f7fafc;
   transition: 0.2s;
 }
@@ -741,7 +741,7 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
   padding: 13px 14px;
   margin: 14px 0;
   border: 1px solid #d5e0eb;
-  border-radius: 9px;
+  border-radius: 2px;
   background: #f8fafc;
 }
 .document-confirm small {
@@ -759,7 +759,7 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
   cursor: pointer;
   color: #fff;
   border: 0;
-  border-radius: 8px;
+  border-radius: 2px;
   background: var(--portal-navy);
   font-weight: 750;
 }
@@ -806,7 +806,7 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
   padding: 11px;
   margin: 14px 0 0;
   color: #075985;
-  border-radius: 8px;
+  border-radius: 2px;
   background: #eaf6fc;
   font-size: 13px;
 }
@@ -826,7 +826,7 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
   flex: none;
   color: var(--portal-blue);
   border: 1px solid #cad9e8;
-  border-radius: 10px;
+  border-radius: 2px;
   background: #f0f6fb;
   box-shadow: 8px 8px 0 #e2eaf2;
 }
@@ -887,7 +887,7 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
   padding: 4px 9px;
   flex: none;
   color: #334155;
-  border-radius: 999px;
+  border-radius: 2px;
   background: #edf1f5;
 }
 .document-result-heading .document-ai-label {
@@ -919,7 +919,7 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
 .document-chunk__meta span {
   padding: 1px 6px;
   color: #52667b;
-  border-radius: 4px;
+  border-radius: 2px;
   background: #eef2f6;
   font-size: 11px;
 }
@@ -973,7 +973,7 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
   cursor: pointer;
   color: #fff;
   border: 0;
-  border-radius: 8px;
+  border-radius: 2px;
   background: var(--portal-blue);
   font-weight: 750;
 }
@@ -985,7 +985,7 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
   margin: 0 18px 18px;
   padding: 15px;
   border: 1px solid #c8dbe9;
-  border-radius: 10px;
+  border-radius: 2px;
   background: #f4f9fc;
 }
 .document-answer__title {
@@ -1010,7 +1010,7 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
   cursor: pointer;
   text-align: left;
   border: 1px solid #c8d8e6;
-  border-radius: 7px;
+  border-radius: 2px;
   background: #fff;
 }
 .document-citations button span {

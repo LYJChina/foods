@@ -85,9 +85,9 @@ async function submitPrecheck(): Promise<void> {
 <template>
   <main class="portal-page portal-container">
     <header class="portal-page__intro">
-      <span class="portal-section__kicker">标志性服务 Demo</span>
+      <span class="portal-section__kicker">出口合规服务</span>
       <h1>产品出口合规 AI 预检</h1>
-      <p>选择产品类型和目标市场，提交低敏材料描述，获得结构化的演示风险提示。</p>
+      <p>选择产品类型和目标市场，提交低敏材料描述，获得结构化风险提示。</p>
     </header>
 
     <div class="portal-precheck-layout">
@@ -130,7 +130,7 @@ async function submitPrecheck(): Promise<void> {
           </div>
 
           <div v-else-if="step === 2">
-            <p class="portal-form-help">本 Demo 不上传文件，仅选择拟提交的材料类型。正式建设时应采用最小必要、按次处理和可配置不留存策略。</p>
+            <p class="portal-form-help">本次服务不上传文件，仅选择拟提交的材料类型。正式建设时应采用最小必要、按次处理和可配置不留存策略。</p>
             <fieldset class="portal-materials">
               <legend>选择低敏材料 <em>至少一项</em></legend>
               <label v-for="option in materialOptions" :key="option.value">
@@ -151,7 +151,7 @@ async function submitPrecheck(): Promise<void> {
               <ul>
                 <li><Icon icon="ri:close-circle-line" aria-hidden="true" /> 不提交配方比例、工艺参数、成本、客户、订单和生产经营数据</li>
                 <li><Icon icon="ri:check-line" aria-hidden="true" /> 仅提交标签、包装、规格说明或公开资料等低敏信息</li>
-                <li><Icon icon="ri:information-line" aria-hidden="true" /> Demo 使用固定规则，不调用 OCR、实时法规库或真实大模型</li>
+                <li><Icon icon="ri:information-line" aria-hidden="true" /> 当前使用固定辅助规则，不调用 OCR、实时法规库或真实大模型</li>
               </ul>
             </div>
             <label class="portal-confirm-check">
@@ -171,7 +171,7 @@ async function submitPrecheck(): Promise<void> {
             <button v-if="step > 1" type="button" class="portal-button portal-button--secondary" @click="previousStep">上一步</button>
             <button v-if="step < 3" type="button" class="portal-button portal-button--primary" data-testid="next-step" @click="nextStep">下一步</button>
             <button v-else type="submit" class="portal-button portal-button--primary" data-testid="submit-precheck" :disabled="isSubmitting">
-              {{ isSubmitting ? "正在生成 Demo 结果…" : "提交并生成预检结果" }}
+              {{ isSubmitting ? "正在生成结果…" : "提交并生成预检结果" }}
             </button>
           </div>
         </form>
@@ -180,7 +180,7 @@ async function submitPrecheck(): Promise<void> {
       <aside class="portal-side-note">
         <Icon icon="ri:shield-check-line" aria-hidden="true" />
         <h2>本轮会做什么</h2>
-        <p>根据产品类别、目标市场和材料类型运行确定性的 Demo 规则，返回风险条目、缺失材料和下一步建议。</p>
+        <p>根据产品类别、目标市场和材料类型运行确定性辅助规则，返回风险条目、缺失材料和下一步建议。</p>
         <h3>本轮不会做什么</h3>
         <p>不会上传或解析真实文件，不会查询政府后台接口，也不会调用真实法规库或大模型。</p>
       </aside>

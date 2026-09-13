@@ -26,14 +26,14 @@ class DemoComplianceAnalyzer:
 
         risks = [
             RiskItem(
-                code="DEMO-LABEL-001",
+                code="AUX-LABEL-001",
                 title="标签与强制标识需人工复核",
                 level="attention",
-                summary=f"目标市场为 {request.target_market}。Demo 未连接实时法规库，不能确认具体标签要求。",
+                summary=f"目标市场为 {request.target_market}。当前服务未连接实时法规库，不能确认具体标签要求。",
                 next_step="由合规人员依据目标市场现行官方规则核验语言、配料、过敏原和营养标识。",
             ),
             RiskItem(
-                code="DEMO-CERT-001",
+                code="AUX-CERT-001",
                 title="认证与验厂条件待确认",
                 level="info",
                 summary="认证要求通常取决于产品、市场和客户约定，本结果不作认证适用性判断。",
@@ -45,7 +45,7 @@ class DemoComplianceAnalyzer:
             overall="insufficient_materials" if missing_materials else "needs_review",
             risks=risks,
             missing_materials=missing_materials,
-            source_labels=["Demo 规则集（非实时法规库）"],
+            source_labels=["辅助规则集（非实时法规库）"],
             next_steps=[
                 "补充或复核低敏材料",
                 "核对目标市场现行公开规则",

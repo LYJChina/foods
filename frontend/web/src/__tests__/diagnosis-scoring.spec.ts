@@ -1,6 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { mount } from "@vue/test-utils";
 
 import { scoreDiagnosis } from "@/views/portal/diagnosis/scoring";
+import PortalDiagnosis from "@/views/portal/diagnosis/index.vue";
+
+vi.mock("@/api/module_food_ai/portal", () => ({
+  FoodAIPortalAPI: { createDiagnosis: vi.fn() },
+}));
 
 describe("diagnosis scoring", () => {
   it.each([
@@ -18,5 +24,11 @@ describe("diagnosis scoring", () => {
       "enterprise_project",
     ]);
     expect(result.is_demo).toBe(true);
+  });
+
+  it("uses production-facing copy on the public diagnosis page", () => {
+    const wrapper = mount(PortalDiagnosis);
+
+    expect(wrapper.text()).not.toMatch(/Demo|DEMO|演示原型|模拟回复/i);
   });
 });

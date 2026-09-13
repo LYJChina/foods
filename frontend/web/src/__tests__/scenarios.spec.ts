@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import PortalScenarios from "@/views/portal/scenarios/index.vue";
 
 describe("scenario gallery", () => {
-  it("shows six bounded food-industry demo scenarios", () => {
+  it("shows six bounded food-industry scenarios without prototype wording", () => {
     const wrapper = mount(PortalScenarios, {
       global: { stubs: { RouterLink: RouterLinkStub } },
     });
@@ -18,7 +18,8 @@ describe("scenario gallery", () => {
     expect(wrapper.text()).toContain("AI+经营");
 
     for (const card of wrapper.findAll('[data-testid="scenario-card"]')) {
-      expect(card.text()).toMatch(/Demo|模拟|规划/);
+      expect(card.text()).toMatch(/辅助展示|规划中/);
+      expect(card.text()).not.toMatch(/Demo|DEMO|模拟/i);
     }
   });
 });

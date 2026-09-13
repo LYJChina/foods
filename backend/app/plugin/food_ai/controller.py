@@ -18,25 +18,25 @@ from .schema import (
 )
 from .service import food_ai_service
 
-FoodAIRouter = APIRouter(prefix="/food-ai", tags=["食品行业 AI 公共服务 Demo"])
+FoodAIRouter = APIRouter(prefix="/food-ai", tags=["食品行业 AI 公共服务"])
 
 
 @FoodAIRouter.get(
     "/portal/summary",
-    summary="获取公开门户演示概览",
+    summary="获取公开门户概览",
     response_model=ResponseSchema[PortalSummary],
 )
 async def get_portal_summary() -> JSONResponse:
     return SuccessResponse(
         data=food_ai_service.get_portal_summary(),
-        msg="获取演示概览成功",
+        msg="获取门户概览成功",
     )
 
 
 @FoodAIRouter.post(
     "/prechecks",
     status_code=status.HTTP_201_CREATED,
-    summary="创建出口合规 Demo 预检",
+    summary="创建出口合规预检",
     response_model=ResponseSchema[PrecheckTask],
 )
 async def create_precheck(
@@ -45,14 +45,14 @@ async def create_precheck(
     task = food_ai_service.create_precheck(data)
     return SuccessResponse(
         data=task,
-        msg="Demo 预检任务已完成",
+        msg="预检任务已完成",
         status_code=status.HTTP_201_CREATED,
     )
 
 
 @FoodAIRouter.get(
     "/prechecks/{task_id}",
-    summary="查询出口合规 Demo 预检",
+    summary="查询出口合规预检",
     response_model=ResponseSchema[PrecheckTask],
 )
 async def get_precheck(
@@ -60,14 +60,14 @@ async def get_precheck(
 ) -> JSONResponse:
     return SuccessResponse(
         data=food_ai_service.get_precheck(task_id),
-        msg="获取 Demo 预检结果成功",
+        msg="获取预检结果成功",
     )
 
 
 @FoodAIRouter.post(
     "/diagnoses",
     status_code=status.HTTP_201_CREATED,
-    summary="生成轻量数智化 Demo 诊断",
+    summary="生成轻量数智化诊断",
     response_model=ResponseSchema[DiagnosisResult],
 )
 async def create_diagnosis(
@@ -75,7 +75,7 @@ async def create_diagnosis(
 ) -> JSONResponse:
     return SuccessResponse(
         data=food_ai_service.create_diagnosis(data),
-        msg="Demo 诊断已生成",
+        msg="诊断建议已生成",
         status_code=status.HTTP_201_CREATED,
     )
 

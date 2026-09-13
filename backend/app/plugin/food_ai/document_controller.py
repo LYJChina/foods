@@ -14,7 +14,7 @@ from .document_parser_client import DocumentParserClient
 from .document_repository import DocumentRepository
 from .document_service import DocumentService
 
-DocumentRouter = APIRouter(prefix="/food-ai/documents", tags=["食品行业 AI 文档解析 Demo"])
+DocumentRouter = APIRouter(prefix="/food-ai/documents", tags=["食品行业 AI 文档解析"])
 _repository = DocumentRepository(settings.DOCUMENT_STORAGE_DIR / "documents.db")
 _document_parser = DocumentParserClient(settings.DOCUMENT_PARSER_URL, settings.DOCUMENT_PARSER_TOKEN, settings.DOCUMENT_LLM_TIMEOUT_SECONDS)
 document_service = DocumentService(_repository, _document_parser, answerer=configured_answerer())

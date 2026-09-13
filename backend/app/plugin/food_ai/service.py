@@ -43,7 +43,7 @@ class FoodAIService:
     def create_precheck(self, request: PrecheckCreate) -> PrecheckTask:
         result = self.analyzer.analyze(request)
         task = PrecheckTask(
-            task_id=f"demo-{uuid4().hex[:12]}",
+            task_id=f"task-{uuid4().hex[:12]}",
             status="completed",
             submitted_at=datetime.now(UTC),
             request=request,

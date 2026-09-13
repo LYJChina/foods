@@ -49,6 +49,8 @@ describe("precheck flow", () => {
       global: { plugins: [router] },
     });
 
+    expect(wrapper.text()).not.toMatch(/Demo|DEMO|演示原型|模拟回复/i);
+
     await wrapper.get('[data-testid="next-step"]').trigger("click");
     expect(wrapper.text()).toContain("请输入产品名称");
 

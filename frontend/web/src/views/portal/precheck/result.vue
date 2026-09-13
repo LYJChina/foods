@@ -17,7 +17,7 @@ async function loadResult(): Promise<void> {
   try {
     task.value = await FoodAIPortalAPI.getPrecheck(String(route.params.taskId));
   } catch {
-    error.value = "结果加载失败。Demo 任务保存在后端进程内，服务重启后需重新提交。";
+    error.value = "结果加载失败。当前预检任务保存在后端进程内，服务重启后需重新提交。";
   } finally {
     loading.value = false;
   }
@@ -29,7 +29,7 @@ onMounted(loadResult);
 <template>
   <main class="portal-page portal-container">
     <header class="portal-page__intro">
-      <span class="portal-section__kicker">结构化 Demo 输出</span>
+      <span class="portal-section__kicker">结构化辅助输出</span>
       <h1>出口合规预检结果</h1>
       <p>结果仅用于辅助预检和流程演示，不构成认证、检验或法律意见。</p>
     </header>
@@ -47,7 +47,7 @@ onMounted(loadResult);
     <div v-else-if="task" class="portal-result">
       <section class="portal-result__summary">
         <div>
-          <span class="portal-data-label">DEMO 规则结果</span>
+          <span class="portal-data-label">辅助规则结果</span>
           <h2>{{ task.result.overall === "needs_review" ? "建议进一步人工复核" : "材料不足，建议补充后复核" }}</h2>
         </div>
         <dl>
@@ -76,7 +76,7 @@ onMounted(loadResult);
 
       <div class="portal-result__columns">
         <section class="portal-result__section">
-          <h2>演示来源</h2>
+          <h2>结果来源</h2>
           <ul><li v-for="item in task.result.source_labels" :key="item">{{ item }}</li></ul>
         </section>
         <section class="portal-result__section">

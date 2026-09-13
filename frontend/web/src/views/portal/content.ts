@@ -26,7 +26,7 @@ export const portalServices: PortalService[] = [
   },
   {
     title: "AI 场景体验与验证",
-    description: "通过 6 个食品行业场景 Demo，说明实施条件、价值与边界。",
+    description: "通过 6 个食品行业场景，说明实施条件、价值与边界。",
     action: "体验场景",
     to: "/portal/scenarios",
     icon: "ri:apps-2-line",

@@ -1,15 +1,25 @@
-# 潮州市食品行业 AI 公共服务平台 Demo
+# 食品行业 AI 公共服务平台
 
-本分支在 FastapiAdmin 基础上建设食品行业公共 AI 服务演示门户。所有页面和数据均明确标注为演示内容，不代表正式政府系统；业务范围、数据边界和运行方式见 docs 目录。
+本项目基于 FastapiAdmin 二次开发，提供匿名公共服务门户、公共服务智能问答、智能文档解析、出口合规预检、企业数智化诊断和 AI 场景匹配。门户新闻与通知目前为明确标注的样例信息，不代表政府部门或监管机构正式发布。
 
-## Demo 快速入口
+## 本地启动
 
-- 本地运行、演示路径与故障排查：[docs/DEMO_RUNBOOK.md](docs/DEMO_RUNBOOK.md)
+按以下顺序启动三个进程：
+
+1. 文档解析服务：监听 `127.0.0.1:8002`，平台通过 `DOCUMENT_PARSER_URL` 调用；具体命令以该服务自身说明为准。
+2. 平台 FastAPI：进入 `backend` 后执行 `.venv/bin/uvicorn app:create_app --factory --lifespan off --host 127.0.0.1 --port 8001`。
+3. Web 前端：进入 `frontend/web` 后执行 `VITE_API_BASE_URL=http://127.0.0.1:8001 pnpm dev --host 127.0.0.1`。
+
+浏览器访问 `http://127.0.0.1:5180/web/#/portal/home`，公共门户无需登录。
+
+智能问答和文档问答共用后端环境变量 `DOCUMENT_LLM_BASE_URL`、`DOCUMENT_LLM_MODEL`、`DOCUMENT_LLM_API_KEY` 和 `DOCUMENT_LLM_TIMEOUT_SECONDS`。仅将真实 API key 写入已忽略的 `backend/env/.env.dev`，不得写入前端、截图、公开文档或 Git 仓库。未配置模型时接口会返回明确的 503，不生成虚假答案。
+
+安全与来源说明：
+
 - API key 与国产大模型接入边界：[docs/API_KEY_SECURITY.md](docs/API_KEY_SECURITY.md)
 - 上游仓库、版本与许可证记录：[docs/UPSTREAM.md](docs/UPSTREAM.md)
-- 门户默认入口：`http://127.0.0.1:5180/web/#/portal/home`
-
-当前交付是确定性 Mock Demo：后端不依赖真实 OCR、实时法规库或大模型，任务仅保存在进程内存中，服务重启后即丢失。前端依赖命令统一使用 `npx --yes pnpm@9.15.3`，避免本机 pnpm 版本差异影响锁文件和构建结果。
+- 不上传配方、工艺、成本、客户、订单和生产经营数据。
+- 文档解析能力在用户界面中统一称为“公共服务平台智能体”。
 
 上游项目说明如下。
 
