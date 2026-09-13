@@ -80,9 +80,13 @@ const sampleSnapshot: DashboardSnapshot = {
   ],
 };
 
+function cloneSampleSnapshot(): DashboardSnapshot {
+  return JSON.parse(JSON.stringify(sampleSnapshot)) as DashboardSnapshot;
+}
+
 export const DashboardAPI = {
   dataMode: "sample" as const,
   async getSnapshot(): Promise<DashboardSnapshot> {
-    return structuredClone(sampleSnapshot);
+    return cloneSampleSnapshot();
   },
 };
