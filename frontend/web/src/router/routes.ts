@@ -278,6 +278,24 @@ export const staticRoutes: AppRouteRecordRaw[] = [
         meta: { public: true, title: "首页" },
       },
       {
+        path: "services",
+        name: "PortalServices",
+        component: () => import("@views/portal/services/index.vue"),
+        meta: { public: true, title: "智能服务大厅" },
+      },
+      {
+        path: "records",
+        name: "PortalRecords",
+        component: () => import("@views/portal/records/index.vue"),
+        meta: { public: true, title: "办理记录" },
+      },
+      {
+        path: "guide",
+        name: "PortalGuide",
+        component: () => import("@views/portal/guide/index.vue"),
+        meta: { public: true, title: "使用指南" },
+      },
+      {
         path: "precheck",
         name: "PortalPrecheck",
         component: () => import("@views/portal/precheck/index.vue"),

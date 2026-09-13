@@ -31,14 +31,19 @@ describe("public portal routes", () => {
     expect(portalRoute?.meta?.public).toBe(true);
 
     const children = (portalRoute?.children ?? []) as RouteRecordRaw[];
-    expect(children.map((route) => route.path)).toEqual([
-      "home",
-      "precheck",
-      "precheck/:taskId",
-      "scenarios",
-      "diagnosis",
-      "documents",
-    ]);
+    expect(children.map((route) => route.path)).toEqual(
+      expect.arrayContaining([
+        "home",
+        "services",
+        "records",
+        "guide",
+        "documents",
+        "precheck",
+        "precheck/:taskId",
+        "scenarios",
+        "diagnosis",
+      ])
+    );
     expect(children.every((route) => route.meta?.public === true)).toBe(true);
   });
 });

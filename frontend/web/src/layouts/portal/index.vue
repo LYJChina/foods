@@ -7,6 +7,12 @@ import { RouterView } from "vue-router";
   <div class="portal-layout">
     <a class="portal-skip-link" href="#portal-main">跳到主要内容</a>
     <header class="portal-header">
+      <div class="portal-utility-bar">
+        <div class="portal-container portal-utility-bar__inner">
+          <span>潮州市食品行业公共服务</span>
+          <span>公共材料服务专区</span>
+        </div>
+      </div>
       <div class="portal-container portal-header__brand-row">
         <RouterLink
           class="portal-brand"
@@ -24,11 +30,10 @@ import { RouterView } from "vue-router";
       </div>
       <nav class="portal-nav" aria-label="主导航">
         <div class="portal-container portal-nav__inner">
-          <RouterLink to="/portal/home">首页</RouterLink>
-          <RouterLink to="/portal/documents">智能文档解析</RouterLink>
-          <RouterLink to="/portal/precheck">出口合规预检</RouterLink>
-          <RouterLink to="/portal/scenarios">应用场景</RouterLink>
-          <RouterLink to="/portal/diagnosis">数智化诊断</RouterLink>
+          <RouterLink to="/portal/home">中台首页</RouterLink>
+          <RouterLink to="/portal/services">智能服务大厅</RouterLink>
+          <RouterLink to="/portal/records">办理记录</RouterLink>
+          <RouterLink to="/portal/guide">使用指南</RouterLink>
         </div>
       </nav>
     </header>
