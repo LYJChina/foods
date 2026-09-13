@@ -41,11 +41,16 @@ _DISK_SUFFIXES = {".pdf", ".docx", ".pptx", ".jpg", ".png"}
 def validate_upload(
     file_name: str,
     content_type: str | None,
-    header: bytes,
+    upload_bytes: bytes,
     size: int,
     confirmed_low_sensitivity: bool,
 ) -> str:
-    """Validate untrusted upload metadata and return its safe disk suffix."""
+    """Validate a complete untrusted upload and return its safe disk suffix.
+
+    Callers must pass the complete upload bytes, not a fixed-length header slice.
+    PDF and image validation checks the leading signature; DOCX/PPTX additionally
+    inspect the ZIP directory for their required OOXML parts.
+    """
     if not confirmed_low_sensitivity:
         raise ValueError("仅允许已确认的低敏公开资料，不得上传配方、工艺、成本、客户、订单或生产经营数据。")
     if not isinstance(size, int) or size < 0 or size > settings.DOCUMENT_MAX_UPLOAD_BYTES:
@@ -55,9 +60,11 @@ def validate_upload(
     type_definition = _SUPPORTED_TYPES.get(suffix)
     if type_definition is None or (content_type or "").lower().split(";", 1)[0].strip() != type_definition[0]:
         raise ValueError("文件类型与扩展名不匹配或不受支持。")
-    if not isinstance(header, bytes) or not any(header.startswith(signature) for signature in type_definition[1]):
+    if not isinstance(upload_bytes, bytes) or len(upload_bytes) != size:
         raise ValueError("文件内容与声明的类型不匹配。")
-    if suffix in {".docx", ".pptx"} and not _is_expected_ooxml(header, suffix):
+    if not any(upload_bytes.startswith(signature) for signature in type_definition[1]):
+        raise ValueError("文件内容与声明的类型不匹配。")
+    if suffix in {".docx", ".pptx"} and not _is_expected_ooxml(upload_bytes, suffix):
         raise ValueError("文件内容与声明的类型不匹配。")
     return ".jpg" if suffix == ".jpeg" else suffix
 

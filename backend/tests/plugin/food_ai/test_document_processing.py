@@ -51,15 +51,15 @@ def make_ooxml(*members: str) -> bytes:
 def test_validate_upload_accepts_only_supported_extension_mime_and_signature(
     file_name: str, content_type: str, header: bytes, expected_suffix: str
 ) -> None:
-    assert validate_upload(file_name, content_type, header, 20 * 1024 * 1024, True) == expected_suffix
+    assert validate_upload(file_name, content_type, header, len(header), True) == expected_suffix
 
 
 def test_validate_upload_rejects_mismatched_extension_mime_or_signature() -> None:
     with pytest.raises(ValueError, match="文件类型"):
-        validate_upload("标签.pdf", "image/png", PNG_HEADER, 1, True)
+        validate_upload("标签.pdf", "image/png", PNG_HEADER, len(PNG_HEADER), True)
 
     with pytest.raises(ValueError, match="文件内容"):
-        validate_upload("标签.pdf", "application/pdf", PNG_HEADER, 1, True)
+        validate_upload("标签.pdf", "application/pdf", PNG_HEADER, len(PNG_HEADER), True)
 
 
 def test_validate_upload_rejects_plain_zip_and_cross_type_ooxml_disguises() -> None:
@@ -107,13 +107,37 @@ def test_validate_upload_rejects_plain_zip_and_cross_type_ooxml_disguises() -> N
         )
 
 
+def test_validate_upload_requires_complete_upload_bytes_for_ooxml_validation() -> None:
+    word_document = make_ooxml("word/document.xml")
+
+    assert (
+        validate_upload(
+            file_name="标签.docx",
+            content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            upload_bytes=word_document,
+            size=len(word_document),
+            confirmed_low_sensitivity=True,
+        )
+        == ".docx"
+    )
+    with pytest.raises(ValueError, match="文件内容"):
+        validate_upload(
+            file_name="标签.docx",
+            content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            upload_bytes=word_document[:16],
+            size=len(word_document),
+            confirmed_low_sensitivity=True,
+        )
+
+
 def test_validate_upload_enforces_size_boundary_and_low_sensitivity_declaration() -> None:
-    assert validate_upload("标签.pdf", "application/pdf", PDF_HEADER, 20 * 1024 * 1024, True) == ".pdf"
+    pdf_at_limit = PDF_HEADER + b"\0" * (20 * 1024 * 1024 - len(PDF_HEADER))
+    assert validate_upload("标签.pdf", "application/pdf", pdf_at_limit, len(pdf_at_limit), True) == ".pdf"
 
     with pytest.raises(ValueError, match="20MB"):
-        validate_upload("标签.pdf", "application/pdf", PDF_HEADER, 20 * 1024 * 1024 + 1, True)
+        validate_upload("标签.pdf", "application/pdf", pdf_at_limit, len(pdf_at_limit) + 1, True)
     with pytest.raises(ValueError, match="低敏"):
-        validate_upload("标签.pdf", "application/pdf", PDF_HEADER, 1, False)
+        validate_upload("标签.pdf", "application/pdf", PDF_HEADER, len(PDF_HEADER), False)
 
 
 def test_sanitize_file_name_never_preserves_user_supplied_path() -> None:
