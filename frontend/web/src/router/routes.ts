@@ -284,6 +284,12 @@ export const staticRoutes: AppRouteRecordRaw[] = [
         meta: { public: true, title: "智能服务大厅" },
       },
       {
+        path: "assistant",
+        name: "PortalAssistant",
+        component: () => import("@views/portal/assistant/index.vue"),
+        meta: { public: true, title: "公共服务智能问答" },
+      },
+      {
         path: "records",
         name: "PortalRecords",
         component: () => import("@views/portal/records/index.vue"),

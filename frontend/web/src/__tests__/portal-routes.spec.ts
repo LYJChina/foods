@@ -34,6 +34,7 @@ describe("public portal routes", () => {
     expect(children.map((route) => route.path)).toEqual(
       expect.arrayContaining([
         "home",
+        "assistant",
         "services",
         "records",
         "guide",
