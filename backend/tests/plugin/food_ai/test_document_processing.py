@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from io import BytesIO
 from zipfile import ZIP_DEFLATED, ZipFile
 
@@ -242,3 +243,14 @@ def test_extract_chunks_preserves_repeated_body_text_across_pages() -> None:
     chunks = extract_chunks(mineru_result)
 
     assert [chunk.content for chunk in chunks] == ["本条款适用于所有产品。", "本条款适用于所有产品。"]
+
+
+def test_extract_chunks_decodes_mineru_content_list_json_string() -> None:
+    content_list = [{"type": "text", "text": "解析后的正文。", "page_idx": 0}]
+    mineru_result = {"results": {"document": {"content_list": json.dumps(content_list, ensure_ascii=False)}}}
+
+    chunks = extract_chunks(mineru_result)
+
+    assert len(chunks) == 1
+    assert chunks[0].content == "解析后的正文。"
+    assert chunks[0].page_number == 1

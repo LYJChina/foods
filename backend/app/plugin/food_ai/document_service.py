@@ -74,6 +74,8 @@ class DocumentService:
         try:
             result = await self.mineru.get_result(record.mineru_task_id)
             chunks = [chunk.model_copy(update={"document_id": document_id}) for chunk in extract_chunks(result)]
+            if not chunks:
+                raise ValueError("解析结果没有可预览文本")
             self.repository.replace_chunks(document_id, chunks)
         except MinerUUnavailable:
             raise CustomException(msg="文档解析服务暂不可用，请稍后重试。", status_code=status.HTTP_503_SERVICE_UNAVAILABLE) from None

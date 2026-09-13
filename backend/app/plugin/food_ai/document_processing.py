@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from collections.abc import Mapping, Sequence
 from io import BytesIO
@@ -139,15 +140,26 @@ def _is_expected_ooxml(content: bytes, suffix: str) -> bool:
 
 def _find_content_list(result: Mapping[str, Any]) -> Sequence[Mapping[str, Any]]:
     direct = result.get("content_list")
-    if isinstance(direct, Sequence) and not isinstance(direct, (str, bytes)):
-        return [item for item in direct if isinstance(item, Mapping)]
+    if parsed := _decode_content_list(direct):
+        return parsed
     results = result.get("results")
     if isinstance(results, Mapping):
         for parsed in results.values():
             if isinstance(parsed, Mapping):
                 nested = parsed.get("content_list")
-                if isinstance(nested, Sequence) and not isinstance(nested, (str, bytes)):
-                    return [item for item in nested if isinstance(item, Mapping)]
+                if decoded := _decode_content_list(nested):
+                    return decoded
+    return []
+
+
+def _decode_content_list(value: object) -> list[Mapping[str, Any]]:
+    if isinstance(value, str):
+        try:
+            value = json.loads(value)
+        except json.JSONDecodeError:
+            return []
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+        return [item for item in value if isinstance(item, Mapping)]
     return []
 
 
