@@ -6,6 +6,7 @@ from fastapi import status
 from app.core.exceptions import CustomException
 
 from .analyzer import ComplianceAnalyzer, DemoComplianceAnalyzer
+from .assistant import PublicAssistant, configured_public_assistant
 from .schema import (
     DiagnosisCreate,
     DiagnosisResult,
@@ -33,9 +34,11 @@ class FoodAIService:
         self,
         analyzer: ComplianceAnalyzer | None = None,
         repository: InMemoryPrecheckRepository | None = None,
+        assistant: PublicAssistant | None = None,
     ) -> None:
         self.analyzer = analyzer or DemoComplianceAnalyzer()
         self.repository = repository or InMemoryPrecheckRepository()
+        self.assistant = assistant or configured_public_assistant()
 
     def create_precheck(self, request: PrecheckCreate) -> PrecheckTask:
         result = self.analyzer.analyze(request)

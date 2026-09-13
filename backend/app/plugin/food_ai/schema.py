@@ -81,3 +81,29 @@ class DiagnosisResult(BaseModel):
     ]
     disclaimer: str
     is_demo: Literal[True] = True
+
+
+class AssistantQuestionRequest(BaseModel):
+    question: str = Field(min_length=1, max_length=2000)
+    conversation_id: str | None = Field(default=None, max_length=128)
+
+    @field_validator("question")
+    @classmethod
+    def strip_question(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("问题不能为空")
+        return value
+
+
+class AssistantServiceRecommendation(BaseModel):
+    name: str
+    route: str
+
+
+class AssistantQuestionResult(BaseModel):
+    answer: str
+    conversation_id: str
+    recommended_services: list[AssistantServiceRecommendation] = Field(default_factory=list)
+    sources: list[str] = Field(default_factory=list)
+    disclaimer: Literal["AI 生成，仅供辅助参考"] = "AI 生成，仅供辅助参考"

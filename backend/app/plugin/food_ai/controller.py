@@ -4,8 +4,12 @@ from fastapi import APIRouter, Body, Path, status
 from fastapi.responses import JSONResponse
 
 from app.common.response import ResponseSchema, SuccessResponse
+from app.core.exceptions import CustomException
 
+from .assistant import AssistantUnavailable
 from .schema import (
+    AssistantQuestionRequest,
+    AssistantQuestionResult,
     DiagnosisCreate,
     DiagnosisResult,
     PortalSummary,
@@ -74,3 +78,21 @@ async def create_diagnosis(
         msg="Demo 诊断已生成",
         status_code=status.HTTP_201_CREATED,
     )
+
+
+@FoodAIRouter.post(
+    "/assistant/questions",
+    summary="咨询公共服务智能助手",
+    response_model=ResponseSchema[AssistantQuestionResult],
+)
+async def ask_public_assistant(
+    data: Annotated[AssistantQuestionRequest, Body(description="公共服务咨询问题")],
+) -> JSONResponse:
+    try:
+        result = await food_ai_service.assistant.answer(data.question, data.conversation_id)
+    except AssistantUnavailable:
+        raise CustomException(
+            msg="问答模型服务未配置或暂不可用",
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        ) from None
+    return SuccessResponse(data=result, msg="问答完成")
