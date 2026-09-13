@@ -245,7 +245,7 @@ class Settings(BaseSettings):
     DOCUMENT_RETENTION_DAYS: int = 1
     DOCUMENT_MAX_UPLOAD_BYTES: int = 20 * 1024 * 1024
     DOCUMENT_MAX_PAGES: int = 100
-    DOCUMENT_MAX_CHUNKS: int = 200
+    DOCUMENT_MAX_CHUNKS: int = 500
     DOCUMENT_LLM_BASE_URL: str = ""
     DOCUMENT_LLM_MODEL: str = ""
     DOCUMENT_LLM_API_KEY: str = ""

@@ -13,10 +13,10 @@ from app.config.setting import settings
 from app.core.exceptions import CustomException
 
 from .document_answerer import AnswererUnavailable, DocumentAnswerer
+from .document_parser_client import DocumentParserClient, DocumentParserInvalidResponse, DocumentParserUnavailable
 from .document_processing import count_pdf_pages, extract_chunks, sanitize_file_name, validate_upload
 from .document_repository import DocumentRepository
 from .document_schema import DocumentRecord, DocumentStatus
-from .document_parser_client import DocumentParserClient, DocumentParserInvalidResponse, DocumentParserUnavailable
 
 
 class DocumentService:

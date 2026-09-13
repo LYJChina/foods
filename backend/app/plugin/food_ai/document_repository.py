@@ -175,6 +175,7 @@ class DocumentRepository:
                 CREATE INDEX IF NOT EXISTS idx_document_chunks_document ON document_chunks(document_id, chunk_index);
                 """
             )
+            self._migrate_task_column(connection)
             try:
                 connection.execute(
                     "CREATE VIRTUAL TABLE IF NOT EXISTS document_chunks_fts USING fts5(document_id UNINDEXED, chunk_index UNINDEXED, content)"
@@ -183,6 +184,19 @@ class DocumentRepository:
                 self._fts_available = False
             else:
                 self._fts_available = True
+
+    @staticmethod
+    def _migrate_task_column(connection: sqlite3.Connection) -> None:
+        """Keep databases created by earlier parser-service builds readable."""
+        columns = {row["name"] for row in connection.execute("PRAGMA table_info(documents)").fetchall()}
+        expected = "document_parser_task_id"
+        if expected in columns:
+            return
+        legacy_columns = [column for column in columns if column.endswith("_task_id")]
+        if len(legacy_columns) != 1:
+            return
+        legacy = legacy_columns[0].replace('"', '""')
+        connection.execute(f'ALTER TABLE documents RENAME COLUMN "{legacy}" TO {expected}')
 
     def _connect(self) -> sqlite3.Connection:
         connection = sqlite3.connect(self.database_path)

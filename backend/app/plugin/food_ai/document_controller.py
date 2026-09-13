@@ -10,9 +10,9 @@ from app.common.response import SuccessResponse
 from app.config.setting import settings
 
 from .document_answerer import configured_answerer
+from .document_parser_client import DocumentParserClient
 from .document_repository import DocumentRepository
 from .document_service import DocumentService
-from .document_parser_client import DocumentParserClient
 
 DocumentRouter = APIRouter(prefix="/food-ai/documents", tags=["食品行业 AI 文档解析 Demo"])
 _repository = DocumentRepository(settings.DOCUMENT_STORAGE_DIR / "documents.db")

@@ -209,7 +209,7 @@ def test_extract_chunks_uses_stable_indices_and_bounded_overlapping_content() ->
 def test_extract_chunks_rejects_untrusted_output_exceeding_chunk_limit() -> None:
     document_parser_result = {
         "document_id": "doc-003",
-        "content_list": [{"type": "text", "text": f"第 {index} 条内容", "page_idx": 0} for index in range(201)],
+        "content_list": [{"type": "text", "text": f"第 {index} 条内容", "page_idx": 0} for index in range(501)],
     }
 
     with pytest.raises(ValueError, match="解析结果无效"):

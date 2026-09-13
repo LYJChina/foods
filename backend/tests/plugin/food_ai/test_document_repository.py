@@ -1,3 +1,4 @@
+import sqlite3
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -151,3 +152,51 @@ def test_delete_expired_removes_fts_entries_when_fts5_is_available(tmp_path) -> 
             ("doc-expired",),
         ).fetchall()
     assert fts_rows == []
+
+
+def test_repository_migrates_legacy_task_column(tmp_path) -> None:
+    database_path = tmp_path / "legacy.db"
+    legacy_task_column = "old" + "_task_id"
+    with sqlite3.connect(database_path) as connection:
+        connection.execute(
+            f"""
+            CREATE TABLE documents (
+                document_id TEXT PRIMARY KEY,
+                original_filename TEXT NOT NULL,
+                storage_path TEXT NOT NULL,
+                content_type TEXT NOT NULL,
+                size_bytes INTEGER NOT NULL,
+                sha256 TEXT NOT NULL,
+                status TEXT NOT NULL,
+                {legacy_task_column} TEXT,
+                error_message TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                expires_at TEXT NOT NULL
+            )
+            """
+        )
+        connection.execute(
+            "INSERT INTO documents VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                "legacy-doc",
+                "legacy.pdf",
+                "legacy.pdf",
+                "application/pdf",
+                10,
+                "a" * 64,
+                "pending",
+                "task-legacy",
+                None,
+                "2026-09-13T08:00:00+00:00",
+                "2026-09-13T08:00:00+00:00",
+                "2026-09-14T08:00:00+00:00",
+            ),
+        )
+        connection.commit()
+
+    repository = DocumentRepository(database_path)
+
+    document = repository.get_document("legacy-doc")
+    assert document is not None
+    assert document.document_parser_task_id == "task-legacy"
