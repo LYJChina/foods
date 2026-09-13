@@ -301,6 +301,12 @@ export const staticRoutes: AppRouteRecordRaw[] = [
         component: () => import("@views/portal/diagnosis/index.vue"),
         meta: { public: true, title: "数智化诊断" },
       },
+      {
+        path: "documents",
+        name: "PortalDocuments",
+        component: () => import("@views/portal/documents/index.vue"),
+        meta: { public: true, title: "智能文档解析" },
+      },
     ],
   },
   // 根 Layout：存放壳层路由（home/dashboard/fastlink）

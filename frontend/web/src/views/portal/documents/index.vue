@@ -1,0 +1,11 @@
+<script setup lang="ts">
+import { ref } from "vue";
+import { ElMessage } from "element-plus";
+import { DocumentAPI } from "@/api/module_food_ai/documents";
+const file = ref<File | null>(null), confirmed = ref(false), id = ref(""), state = ref("等待上传"), chunks = ref<any[]>([]), question = ref(""), answer = ref<any>();
+const select = (value: any) => { file.value = value.raw; return false; };
+async function upload() { if (!file.value || !confirmed.value) return ElMessage.warning("请选择文件并确认低敏边界"); const data = await DocumentAPI.create(file.value, confirmed.value); id.value = data.document_id; await refresh(); }
+async function refresh() { const data = await DocumentAPI.status(id.value); state.value = data.status; if (state.value === "ready") chunks.value = (await DocumentAPI.content(id.value)).items; else if (state.value !== "failed") setTimeout(refresh, 1500); }
+async function ask() { if (state.value === "ready" && question.value.trim()) answer.value = await DocumentAPI.question(id.value, question.value); }
+</script>
+<template><main class="portal-container portal-section"><span class="portal-section__kicker">DEMO 原型</span><h1>智能文档解析与问答</h1><p>文档解析使用 MinerU。仅限公开或低敏资料，禁止上传配方、工艺、成本、客户、订单和生产经营数据。</p><section v-if="!id" class="portal-panel"><el-upload :auto-upload="false" :limit="1" :on-change="select" accept=".pdf,.docx,.pptx,.jpg,.jpeg,.png"><el-button type="primary">选择文件</el-button></el-upload><el-checkbox v-model="confirmed">我确认文档为公开或低敏材料</el-checkbox><el-button type="primary" @click="upload">开始解析</el-button></section><section v-else><div class="portal-panel" aria-live="polite">当前状态：{{ state }} <el-button @click="refresh">刷新</el-button></div><div v-if="state === 'ready'" class="document-grid"><article class="portal-panel"><h2>解析预览</h2><p v-for="chunk in chunks" :id="`chunk-${chunk.chunk_index}`" :key="chunk.chunk_index">{{ chunk.content }}</p></article><aside class="portal-panel"><h2>基于文档提问</h2><p>AI 生成，仅供辅助阅读。</p><el-input v-model="question" type="textarea" aria-label="问题"/><el-button type="primary" @click="ask">提问</el-button><p v-if="answer">{{ answer.answer }}</p><a v-for="citation in answer?.citations" :key="citation.chunk_index" :href="`#chunk-${citation.chunk_index}`">{{ citation.excerpt }}</a></aside></div></section></main></template>

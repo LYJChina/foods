@@ -12,7 +12,7 @@ export const portalServices: PortalService[] = [
     title: "通用 AI 能力服务",
     description: "文档解析、多语言辅助、公共知识检索等低门槛能力演示。",
     action: "查看能力",
-    to: "/portal/scenarios",
+    to: "/portal/documents",
     icon: "ri:sparkling-2-line",
     tone: "blue",
   },
