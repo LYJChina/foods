@@ -1,24 +1,57 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { Icon } from "@iconify/vue";
+import { useRoute, useRouter } from "vue-router";
 import { publicServices, serviceCategories, type ServiceCategory } from "./catalog";
 
+const route = useRoute();
+const router = useRouter();
 const query = ref("");
 const activeCategory = ref<ServiceCategory["id"] | "all">("all");
+const availableOnly = ref(false);
+const searchInput = ref<HTMLInputElement>();
+
+function readCategory(value: unknown): ServiceCategory["id"] | "all" {
+  return typeof value === "string" && serviceCategories.some((item) => item.id === value)
+    ? (value as ServiceCategory["id"])
+    : "all";
+}
+
+function syncFromRoute() {
+  activeCategory.value = readCategory(route.query.category);
+  availableOnly.value = route.query.status === "available";
+}
+
 const filteredServices = computed(() => {
   const keyword = query.value.trim().toLowerCase();
   return publicServices.filter((service) => {
     const categoryMatch =
       activeCategory.value === "all" || service.categoryId === activeCategory.value;
+    const statusMatch = !availableOnly.value || service.status === "available";
     const text = [service.name, service.description, service.method, ...(service.keywords ?? [])]
       .join(" ")
       .toLowerCase();
-    return categoryMatch && (!keyword || text.includes(keyword));
+    return categoryMatch && statusMatch && (!keyword || text.includes(keyword));
   });
 });
 function setCategory(category: ServiceCategory["id"] | "all") {
   activeCategory.value = category;
+  const nextQuery = { ...route.query };
+  delete nextQuery.focus;
+  if (category === "all") delete nextQuery.category;
+  else nextQuery.category = category;
+  void router.replace({ query: nextQuery });
 }
+
+watch(() => [route.query.category, route.query.status], syncFromRoute, { immediate: true });
+onMounted(async () => {
+  if (route.query.focus !== "search") return;
+  await nextTick();
+  searchInput.value?.focus();
+  const nextQuery = { ...route.query };
+  delete nextQuery.focus;
+  await router.replace({ query: nextQuery });
+});
 </script>
 
 <template>
@@ -54,7 +87,7 @@ function setCategory(category: ServiceCategory["id"] | "all") {
         </div>
         <label class="service-search"
           ><Icon icon="ri:search-line" aria-hidden="true" /><span class="sr-only">搜索服务</span
-          ><input v-model="query" type="search" placeholder="搜索服务名称或关键词"
+          ><input ref="searchInput" v-model="query" type="search" placeholder="搜索服务名称或关键词"
         /></label>
       </section>
       <div class="service-summary">
