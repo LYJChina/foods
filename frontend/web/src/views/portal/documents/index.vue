@@ -31,7 +31,7 @@ let pollTimer: ReturnType<typeof setTimeout> | undefined;
 
 const steps = [
   { label: "上传完成", icon: "ri:upload-cloud-2-line" },
-  { label: "MinerU 解析", icon: "ri:file-search-line" },
+  { label: "平台智能体解析", icon: "ri:file-search-line" },
   { label: "内容整理", icon: "ri:list-check-3" },
   { label: "可预览问答", icon: "ri:question-answer-line" },
 ];
@@ -59,7 +59,7 @@ const statusMeta = computed(() => {
     },
     parsing: {
       label: "正在解析",
-      detail: "MinerU 正在识别文档结构与正文",
+      detail: "公共服务平台智能体正在识别文档结构与正文",
       tone: "working",
       icon: "svg-spinners:ring-resize",
     },
@@ -210,11 +210,11 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
     </nav>
     <header class="document-hero">
       <div>
-        <div class="document-labels"><span>MinerU 文档解析</span></div>
+        <div class="document-labels"><span>公共服务平台智能体</span></div>
         <h1>智能文档解析与问答</h1>
         <p>
           文档解析使用
-          MinerU。上传公开或低敏文档，完成结构化预览，并通过后端配置的大模型进行带引用问答。
+          上传公开或低敏文档，由公共服务平台智能体完成结构化预览，并通过后端配置的大模型进行带引用问答。
         </p>
       </div>
       <aside class="document-boundary">
@@ -321,7 +321,7 @@ onBeforeUnmount(() => clearTimeout(pollTimer));
           </li>
         </ul>
         <p>
-          <Icon icon="ri:information-line" />MinerU
+          <Icon icon="ri:information-line" />公共服务平台智能体
           与大模型不可用时会明确提示失败，不会伪造成功结果。
         </p>
       </aside>

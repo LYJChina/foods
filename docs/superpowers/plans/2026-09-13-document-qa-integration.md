@@ -1,25 +1,25 @@
-# MinerU Document QA Integration Implementation Plan
+# DocumentParser Document QA Integration Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (- [ ]) syntax for tracking.
 
-**Goal:** 在食品行业 AI 公共服务平台中交付单文档上传、MinerU 解析、Markdown 预览、轻量检索和带引用 LLM 问答的完整 Demo。
+**Goal:** 在食品行业 AI 公共服务平台中交付单文档上传、DocumentParser 解析、Markdown 预览、轻量检索和带引用 LLM 问答的完整 Demo。
 
-**Architecture:** Vue 门户只调用平台 FastAPI；平台后端通过独立 HTTP 客户端访问 MinerU 进程，并使用独立 SQLite 保存文档、解析块与问答。问答先用 FTS5/BM25 或关键词降级检索 Top K，再由可替换的 DocumentAnswerer 调用服务端模型 API。
+**Architecture:** Vue 门户只调用平台 FastAPI；平台后端通过独立 HTTP 客户端访问 DocumentParser 进程，并使用独立 SQLite 保存文档、解析块与问答。问答先用 FTS5/BM25 或关键词降级检索 Top K，再由可替换的 DocumentAnswerer 调用服务端模型 API。
 
 **Tech Stack:** Python 3.12, FastAPI, Pydantic v2, httpx, sqlite3/FTS5, pytest, Vue 3, TypeScript, Vite, Vitest
 
-**Spec:** docs/superpowers/specs/2026-09-13-mineru-document-qa-integration-design.md
+**Spec:** docs/superpowers/specs/2026-09-13-document-qa-integration-design.md
 
 ## Global Constraints
 
-- MinerU 与平台使用独立 Python 环境和进程；不得把 MinerU 重依赖加入平台后端。
-- 浏览器不得直接访问 MinerU 或模型 API，不得接触任何 API key。
+- DocumentParser 与平台使用独立 Python 环境和进程；不得把 DocumentParser 重依赖加入平台后端。
+- 浏览器不得直接访问 DocumentParser 或模型 API，不得接触任何 API key。
 - 只允许单个公开或低敏文档；配方、工艺、成本、客户、订单和生产经营文档禁止上传。
 - 页面始终显示“DEMO 原型”和“AI 生成，仅供辅助阅读”。
-- MinerU 或 LLM 未配置时必须明确返回不可用，不得使用 Mock 伪造解析或问答成功。
+- DocumentParser 或 LLM 未配置时必须明确返回不可用，不得使用 Mock 伪造解析或问答成功。
 - 默认限制 20 MB、100 页、24 小时保留；均从后端配置读取。
 - 原文件名不得用作磁盘路径；日志不得记录文件内容、模型上下文、密钥或厂商原始错误体。
-- MinerU 界面或公开文档必须显著标注使用 MinerU，并建议上线前复核许可证。
+- DocumentParser 界面或公开文档必须显著标注使用 DocumentParser，并建议上线前复核许可证。
 - 前端继续使用 npx --yes pnpm@9.15.3。
 - 所有新增行为严格执行 RED、GREEN、REFACTOR。
 
@@ -36,7 +36,7 @@
 **Interfaces:**
 - Produces: DocumentStatus, DocumentRecord, DocumentChunk, Citation, QuestionResult.
 - Produces: DocumentRepository with create_document, update_status, replace_chunks, get_document, list_chunks, search_chunks, save_question, delete_document, delete_expired.
-- Produces settings for MinerU URL/token, storage/retention/limits and model URL/name/key/timeout.
+- Produces settings for DocumentParser URL/token, storage/retention/limits and model URL/name/key/timeout.
 
 - [ ] **Step 1: Write failing repository tests**
 
@@ -66,27 +66,27 @@ Use Pydantic models for API-facing values and sqlite3 parameterized statements. 
     git add backend/app/config/setting.py backend/app/plugin/food_ai/document_schema.py backend/app/plugin/food_ai/document_repository.py backend/tests/plugin/food_ai/test_document_repository.py
     git commit -m "feat: add document repository and search"
 
-### Task 2: MinerU HTTP 客户端
+### Task 2: DocumentParser HTTP 客户端
 
 **Files:**
-- Create: backend/app/plugin/food_ai/mineru_client.py
-- Test: backend/tests/plugin/food_ai/test_mineru_client.py
+- Create: backend/app/plugin/food_ai/document_parser_client.py
+- Test: backend/tests/plugin/food_ai/test_document_parser_client.py
 
 **Interfaces:**
-- Consumes: MinerU observed routes POST /tasks, GET /tasks/{task_id}, GET /tasks/{task_id}/result and GET /health.
-- Produces: MinerUClient(base_url, service_token, timeout) with health, submit, get_status and get_result.
-- Produces: MinerUUnavailable and MinerUInvalidResponse exceptions containing safe public messages only.
+- Consumes: DocumentParser observed routes POST /tasks, GET /tasks/{task_id}, GET /tasks/{task_id}/result and GET /health.
+- Produces: DocumentParserClient(base_url, service_token, timeout) with health, submit, get_status and get_result.
+- Produces: DocumentParserUnavailable and DocumentParserInvalidResponse exceptions containing safe public messages only.
 
 - [ ] **Step 1: Write failing client tests**
 
-Use httpx MockTransport with complete MinerU fixtures. Assert multipart submission requests return_md and return_content_list, service token is sent only when configured, 202 status maps to progress, malformed JSON raises MinerUInvalidResponse, and network failure raises MinerUUnavailable without embedding the URL or token in the exception string.
+Use httpx MockTransport with complete DocumentParser fixtures. Assert multipart submission requests return_md and return_content_list, service token is sent only when configured, 202 status maps to progress, malformed JSON raises DocumentParserInvalidResponse, and network failure raises DocumentParserUnavailable without embedding the URL or token in the exception string.
 
 - [ ] **Step 2: Run RED**
 
     cd backend
-    .venv/bin/python -m pytest tests/plugin/food_ai/test_mineru_client.py -q
+    .venv/bin/python -m pytest tests/plugin/food_ai/test_document_parser_client.py -q
 
-Expected: import failure for mineru_client.
+Expected: import failure for document_parser_client.
 
 - [ ] **Step 3: Implement the client**
 
@@ -95,12 +95,12 @@ Inject an httpx.AsyncClient or transport for tests. Normalize base_url, set boun
 - [ ] **Step 4: Run GREEN**
 
     cd backend
-    .venv/bin/python -m pytest tests/plugin/food_ai/test_mineru_client.py -q
+    .venv/bin/python -m pytest tests/plugin/food_ai/test_document_parser_client.py -q
 
 - [ ] **Step 5: Commit**
 
-    git add backend/app/plugin/food_ai/mineru_client.py backend/tests/plugin/food_ai/test_mineru_client.py
-    git commit -m "feat: add mineru service client"
+    git add backend/app/plugin/food_ai/document_parser_client.py backend/tests/plugin/food_ai/test_document_parser_client.py
+    git commit -m "feat: add document_parser service client"
 
 ### Task 3: 文件校验、解析结果清洗与分段
 
@@ -109,8 +109,8 @@ Inject an httpx.AsyncClient or transport for tests. Normalize base_url, set boun
 - Test: backend/tests/plugin/food_ai/test_document_processing.py
 
 **Interfaces:**
-- Produces: validate_upload(file_name, content_type, header, size, confirmed_low_sensitivity), sanitize_file_name, extract_chunks(mineru_result), and count_pdf_pages.
-- Consumes: MinerU Markdown/content-list response.
+- Produces: validate_upload(file_name, content_type, header, size, confirmed_low_sensitivity), sanitize_file_name, extract_chunks(document_parser_result), and count_pdf_pages.
+- Consumes: DocumentParser Markdown/content-list response.
 
 - [ ] **Step 1: Write failing validation and chunk tests**
 
@@ -147,11 +147,11 @@ Use file signatures and pypdf for PDF page count. Generate disk names with UUID 
 **Interfaces:**
 - Produces: POST /food-ai/documents, GET /food-ai/documents/{id}, GET /food-ai/documents/{id}/content and DELETE /food-ai/documents/{id}.
 - Produces: DocumentService.create, refresh_status, get_content and delete.
-- Consumes: DocumentRepository, MinerUClient and document_processing functions.
+- Consumes: DocumentRepository, DocumentParserClient and document_processing functions.
 
 - [ ] **Step 1: Write failing API tests**
 
-Use FastAPI TestClient with a temporary repository/storage directory and fake MinerU boundary. Assert anonymous low-sensitivity upload returns 202, status progresses queued → parsing → indexing → ready, content is paginated, invalid type is 400, oversized payload is 413, missing confirmation is 400, missing id is 404, and delete removes the original file plus database data.
+Use FastAPI TestClient with a temporary repository/storage directory and fake DocumentParser boundary. Assert anonymous low-sensitivity upload returns 202, status progresses queued → parsing → indexing → ready, content is paginated, invalid type is 400, oversized payload is 413, missing confirmation is 400, missing id is 404, and delete removes the original file plus database data.
 
 - [ ] **Step 2: Run RED**
 
@@ -160,7 +160,7 @@ Use FastAPI TestClient with a temporary repository/storage directory and fake Mi
 
 - [ ] **Step 3: Implement service and controller**
 
-Stream uploads to a UUID path while enforcing byte limit. Store only safe file metadata. Submit to MinerU, persist external task id, refresh state on status reads, index exactly once after completion, and map upstream failures to safe 502/503 responses. Never return MinerU URL or local path.
+Stream uploads to a UUID path while enforcing byte limit. Store only safe file metadata. Submit to DocumentParser, persist external task id, refresh state on status reads, index exactly once after completion, and map upstream failures to safe 502/503 responses. Never return DocumentParser URL or local path.
 
 - [ ] **Step 4: Run GREEN and full backend tests**
 
@@ -246,7 +246,7 @@ Assert one-file limit, allowed suffixes, 20 MB client hint, mandatory confirmati
 
 - [ ] **Step 3: Write failing mounted flow tests**
 
-Mock only the typed platform API boundary. Assert the page labels MinerU usage, rejects missing confirmation inline, submits FormData, announces progress without moving focus, renders Markdown as escaped/sanitized content, sends a question only when ready, displays citations as buttons/links to stable anchors, reports service-unconfigured errors, and confirms before deletion.
+Mock only the typed platform API boundary. Assert the page labels DocumentParser usage, rejects missing confirmation inline, submits FormData, announces progress without moving focus, renders Markdown as escaped/sanitized content, sends a question only when ready, displays citations as buttons/links to stable anchors, reports service-unconfigured errors, and confirms before deletion.
 
 - [ ] **Step 4: Implement typed API and UI**
 
@@ -272,12 +272,12 @@ Use existing PortalLayout and compact design tokens. Keep body text at least 16p
 - Modify: backend/env/.env.example
 - Modify: docs/DEMO_RUNBOOK.md
 - Modify: docs/API_KEY_SECURITY.md
-- Create: docs/MINERU_INTEGRATION.md
+- Create: docs/DOCUMENT_PARSER_INTEGRATION.md
 - Test: backend/tests/plugin/food_ai/test_document_cleanup.py
 
 **Interfaces:**
 - Produces: cleanup_expired_documents(repository, storage_dir, now).
-- Produces: reproducible three-process startup without copying MinerU credentials into platform.
+- Produces: reproducible three-process startup without copying DocumentParser credentials into platform.
 
 - [ ] **Step 1: Write failing cleanup tests**
 
@@ -290,7 +290,7 @@ Create expired and active document fixtures plus files under tmp_path. Assert on
 
 - [ ] **Step 3: Document local startup and security**
 
-Document three terminals: MinerU on 8002, platform on 8001 and Vue on 5180. Use variable names and placeholders only. Record that the inspected MinerU checkout contained an untracked non-placeholder credential requiring rotation, without recording its value. Document attribution, service isolation, retention, size/page limits and failure behavior.
+Document three terminals: DocumentParser on 8002, platform on 8001 and Vue on 5180. Use variable names and placeholders only. Record that the inspected DocumentParser checkout contained an untracked non-placeholder credential requiring rotation, without recording its value. Document attribution, service isolation, retention, size/page limits and failure behavior.
 
 - [ ] **Step 4: Run security scans**
 
@@ -310,9 +310,9 @@ Scan tracked changes for common provider key prefixes, private keys, Authorizati
 
 - [ ] **Step 6: Run real local integration**
 
-Start MinerU, platform and Vue. Upload one approved low-sensitivity sample; verify progress, Markdown preview, indexed chunks, one cited answer and deletion. Repeat with MinerU stopped and model variables absent to verify explicit 503 states. Inspect 375, 768, 1024 and 1440 widths with no horizontal page scroll or assistant overlay.
+Start DocumentParser, platform and Vue. Upload one approved low-sensitivity sample; verify progress, Markdown preview, indexed chunks, one cited answer and deletion. Repeat with DocumentParser stopped and model variables absent to verify explicit 503 states. Inspect 375, 768, 1024 and 1440 widths with no horizontal page scroll or assistant overlay.
 
 - [ ] **Step 7: Commit**
 
     git add backend/app/plugin/food_ai/document_cleanup.py backend/app/plugin/food_ai/document_controller.py backend/env/.env.example backend/tests/plugin/food_ai/test_document_cleanup.py docs
-    git commit -m "docs: add mineru integration runbook"
+    git commit -m "docs: add document_parser integration runbook"

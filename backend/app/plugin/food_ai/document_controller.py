@@ -1,4 +1,4 @@
-"""Public platform endpoints; browsers never call MinerU directly."""
+"""Public platform endpoints; browsers never call DocumentParser directly."""
 
 from typing import Annotated
 
@@ -12,12 +12,12 @@ from app.config.setting import settings
 from .document_answerer import configured_answerer
 from .document_repository import DocumentRepository
 from .document_service import DocumentService
-from .mineru_client import MinerUClient
+from .document_parser_client import DocumentParserClient
 
 DocumentRouter = APIRouter(prefix="/food-ai/documents", tags=["食品行业 AI 文档解析 Demo"])
 _repository = DocumentRepository(settings.DOCUMENT_STORAGE_DIR / "documents.db")
-_mineru = MinerUClient(settings.MINERU_URL, settings.MINERU_TOKEN, settings.DOCUMENT_LLM_TIMEOUT_SECONDS)
-document_service = DocumentService(_repository, _mineru, answerer=configured_answerer())
+_document_parser = DocumentParserClient(settings.DOCUMENT_PARSER_URL, settings.DOCUMENT_PARSER_TOKEN, settings.DOCUMENT_LLM_TIMEOUT_SECONDS)
+document_service = DocumentService(_repository, _document_parser, answerer=configured_answerer())
 
 
 class QuestionRequest(BaseModel):

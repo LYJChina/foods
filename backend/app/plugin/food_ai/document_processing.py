@@ -1,4 +1,4 @@
-"""Safe validation and deterministic MinerU-result chunking for document QA."""
+"""Safe validation and deterministic DocumentParser-result chunking for document QA."""
 
 from __future__ import annotations
 
@@ -92,10 +92,10 @@ def count_pdf_pages(pdf: bytes | BinaryIO) -> int:
     return page_count
 
 
-def extract_chunks(mineru_result: Mapping[str, Any]) -> list[DocumentChunk]:
-    """Turn MinerU content-list data into bounded, source-attributed document chunks."""
-    document_id = str(mineru_result.get("document_id") or "document")
-    content_list = _find_content_list(mineru_result)
+def extract_chunks(document_parser_result: Mapping[str, Any]) -> list[DocumentChunk]:
+    """Turn DocumentParser content-list data into bounded, source-attributed document chunks."""
+    document_id = str(document_parser_result.get("document_id") or "document")
+    content_list = _find_content_list(document_parser_result)
     entries = _text_entries(content_list)
 
     chunks: list[DocumentChunk] = []

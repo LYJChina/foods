@@ -239,8 +239,8 @@ class Settings(BaseSettings):
     # ================================================= #
     # ************** 文档解析与问答（可选）************* #
     # ================================================= #
-    MINERU_URL: str = "http://127.0.0.1:8002"
-    MINERU_TOKEN: str = ""
+    DOCUMENT_PARSER_URL: str = "http://127.0.0.1:8002"
+    DOCUMENT_PARSER_TOKEN: str = ""
     DOCUMENT_STORAGE_DIR: Path = Path("data/documents")
     DOCUMENT_RETENTION_DAYS: int = 1
     DOCUMENT_MAX_UPLOAD_BYTES: int = 20 * 1024 * 1024

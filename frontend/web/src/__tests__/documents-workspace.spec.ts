@@ -28,7 +28,7 @@ describe("document parsing workspace", () => {
     });
 
     expect(wrapper.get("h1").text()).toContain("智能文档解析与问答");
-    expect(wrapper.text()).toContain("文档解析使用 MinerU");
+    expect(wrapper.text()).toContain("公共服务平台智能体");
     expect(wrapper.text()).toContain("20MB");
     expect(wrapper.text()).toContain("24 小时自动删除");
     expect(wrapper.text()).toContain("禁止上传配方、工艺、成本、客户、订单和生产经营数据");

@@ -19,7 +19,7 @@ class DocumentRecord(BaseModel):
     size_bytes: int = Field(ge=0)
     sha256: str = Field(min_length=1, max_length=128)
     status: DocumentStatus = DocumentStatus.PENDING
-    mineru_task_id: str | None = Field(default=None, max_length=255)
+    document_parser_task_id: str | None = Field(default=None, max_length=255)
     error_message: str | None = Field(default=None, max_length=2000)
     created_at: datetime
     updated_at: datetime

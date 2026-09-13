@@ -10,7 +10,7 @@ export interface PortalService {
 export const portalServices: PortalService[] = [
   {
     title: "智能文档解析与问答",
-    description: "上传公开或低敏文档，使用 MinerU 解析并基于原文引用进行问答。",
+    description: "上传公开或低敏文档，由公共服务平台智能体解析并基于原文引用进行问答。",
     action: "上传文档",
     to: "/portal/documents",
     icon: "ri:sparkling-2-line",

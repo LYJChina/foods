@@ -42,11 +42,11 @@ def test_create_read_and_update_status(tmp_path) -> None:
     assert created.status is DocumentStatus.PENDING
     assert repository.get_document("missing") is None
 
-    updated = repository.update_status("doc-001", DocumentStatus.PROCESSING, mineru_task_id="task-100")
+    updated = repository.update_status("doc-001", DocumentStatus.PROCESSING, document_parser_task_id="task-100")
 
     assert updated is not None
     assert updated.status is DocumentStatus.PROCESSING
-    assert updated.mineru_task_id == "task-100"
+    assert updated.document_parser_task_id == "task-100"
     assert repository.get_document("doc-001") == updated
 
 

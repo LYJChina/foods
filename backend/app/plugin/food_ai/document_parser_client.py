@@ -5,22 +5,22 @@ from typing import Any
 import httpx
 
 
-class MinerUUnavailable(Exception):
-    """The MinerU service cannot be reached or cannot complete a request."""
+class DocumentParserUnavailable(Exception):
+    """The DocumentParser service cannot be reached or cannot complete a request."""
 
     def __init__(self) -> None:
         super().__init__("文档解析服务暂不可用，请稍后重试。")
 
 
-class MinerUInvalidResponse(Exception):
-    """The MinerU service returned a response outside the expected contract."""
+class DocumentParserInvalidResponse(Exception):
+    """The DocumentParser service returned a response outside the expected contract."""
 
     def __init__(self) -> None:
         super().__init__("文档解析服务返回的数据无效。")
 
 
-class MinerUClient:
-    """Small, isolated HTTP boundary for the separately-running MinerU service."""
+class DocumentParserClient:
+    """Small, isolated HTTP boundary for the separately-running DocumentParser service."""
 
     _MIN_TIMEOUT_SECONDS = 1.0
     _MAX_TIMEOUT_SECONDS = 120.0
@@ -50,7 +50,7 @@ class MinerUClient:
             trust_env=False,
         )
 
-    async def __aenter__(self) -> "MinerUClient":
+    async def __aenter__(self) -> "DocumentParserClient":
         return self
 
     async def __aexit__(self, exc_type: object, exc_value: object, traceback: object) -> None:
@@ -93,7 +93,7 @@ class MinerUClient:
             self._validate_task_payload(payload)
             return payload
         if not isinstance(payload.get("results"), Mapping):
-            raise MinerUInvalidResponse()
+            raise DocumentParserInvalidResponse()
         return payload
 
     async def _request(
@@ -126,13 +126,13 @@ class MinerUClient:
             )
             response.raise_for_status()
         except httpx.HTTPError:
-            raise MinerUUnavailable() from None
+            raise DocumentParserUnavailable() from None
         try:
             payload = response.json()
         except (ValueError, TypeError):
-            raise MinerUInvalidResponse() from None
+            raise DocumentParserInvalidResponse() from None
         if not isinstance(payload, Mapping):
-            raise MinerUInvalidResponse()
+            raise DocumentParserInvalidResponse()
         return response, dict(payload)
 
     @classmethod
@@ -149,7 +149,7 @@ class MinerUClient:
     def _require_nonempty_string(payload: Mapping[str, Any], field: str) -> None:
         value = payload.get(field)
         if not isinstance(value, str) or not value.strip():
-            raise MinerUInvalidResponse()
+            raise DocumentParserInvalidResponse()
 
     def _validate_task_payload(self, payload: Mapping[str, Any]) -> None:
         self._require_nonempty_string(payload, "task_id")

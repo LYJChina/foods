@@ -14,7 +14,7 @@
 
 - Do not implement a real statistics backend, RAG database query, MCP management, or general-purpose RAG assistant in this phase.
 - Sample statistics and records must be marked `示例数据`; do not display fabricated growth rates, rankings, or real-time claims.
-- Keep the existing `/portal/documents` FastAPI → MinerU → LLM workflow unchanged.
+- Keep the existing `/portal/documents` FastAPI → DocumentParser → LLM workflow unchanged.
 - Planned services must be marked `规划中` and must not navigate into fake workflows.
 - Use government blue, white, light gray, and restrained gold; no gradients, glass effects, large shadows, purple/pink AI styling, or obvious rounded cards.
 - Use square corners or at most `2px` radius for containers, buttons, inputs, charts, and statuses.

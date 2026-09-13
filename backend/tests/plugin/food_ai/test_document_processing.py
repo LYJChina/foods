@@ -162,7 +162,7 @@ def test_count_pdf_pages_rejects_document_over_one_hundred_pages() -> None:
 
 
 def test_extract_chunks_removes_repeated_headers_and_footers_and_preserves_context() -> None:
-    mineru_result = {
+    document_parser_result = {
         "document_id": "doc-001",
         "content_list": [
             {"type": "title", "text": "食品标签", "text_level": 1, "page_idx": 0},
@@ -176,7 +176,7 @@ def test_extract_chunks_removes_repeated_headers_and_footers_and_preserves_conte
         ],
     }
 
-    chunks = extract_chunks(mineru_result)
+    chunks = extract_chunks(document_parser_result)
 
     assert [(chunk.document_id, chunk.chunk_index, chunk.page_number, chunk.heading) for chunk in chunks] == [
         ("doc-001", 0, 1, "食品标签"),
@@ -187,7 +187,7 @@ def test_extract_chunks_removes_repeated_headers_and_footers_and_preserves_conte
 
 def test_extract_chunks_uses_stable_indices_and_bounded_overlapping_content() -> None:
     paragraph = "标签信息" * (MAX_CHUNK_CHARACTERS // 4 + 80)
-    mineru_result = {
+    document_parser_result = {
         "document_id": "doc-002",
         "content_list": [
             {"type": "title", "text": "通则", "text_level": 1, "page_idx": 2},
@@ -195,8 +195,8 @@ def test_extract_chunks_uses_stable_indices_and_bounded_overlapping_content() ->
         ],
     }
 
-    first = extract_chunks(mineru_result)
-    second = extract_chunks(mineru_result)
+    first = extract_chunks(document_parser_result)
+    second = extract_chunks(document_parser_result)
 
     assert [chunk.chunk_index for chunk in first] == list(range(len(first)))
     assert first == second
@@ -207,17 +207,17 @@ def test_extract_chunks_uses_stable_indices_and_bounded_overlapping_content() ->
 
 
 def test_extract_chunks_rejects_untrusted_output_exceeding_chunk_limit() -> None:
-    mineru_result = {
+    document_parser_result = {
         "document_id": "doc-003",
         "content_list": [{"type": "text", "text": f"第 {index} 条内容", "page_idx": 0} for index in range(201)],
     }
 
     with pytest.raises(ValueError, match="解析结果无效"):
-        extract_chunks(mineru_result)
+        extract_chunks(document_parser_result)
 
 
 def test_extract_chunks_truncates_untrusted_heading_path_to_schema_limit() -> None:
-    mineru_result = {
+    document_parser_result = {
         "document_id": "doc-004",
         "content_list": [
             {"type": "title", "text": "标题" * 400, "text_level": 1, "page_idx": 0},
@@ -225,14 +225,14 @@ def test_extract_chunks_truncates_untrusted_heading_path_to_schema_limit() -> No
         ],
     }
 
-    chunks = extract_chunks(mineru_result)
+    chunks = extract_chunks(document_parser_result)
 
     assert len(chunks[0].heading or "") == 500
     assert chunks[0].heading == "标题" * 250
 
 
 def test_extract_chunks_preserves_repeated_body_text_across_pages() -> None:
-    mineru_result = {
+    document_parser_result = {
         "document_id": "doc-005",
         "content_list": [
             {"type": "text", "text": "本条款适用于所有产品。", "page_idx": 0},
@@ -240,16 +240,16 @@ def test_extract_chunks_preserves_repeated_body_text_across_pages() -> None:
         ],
     }
 
-    chunks = extract_chunks(mineru_result)
+    chunks = extract_chunks(document_parser_result)
 
     assert [chunk.content for chunk in chunks] == ["本条款适用于所有产品。", "本条款适用于所有产品。"]
 
 
-def test_extract_chunks_decodes_mineru_content_list_json_string() -> None:
+def test_extract_chunks_decodes_document_parser_content_list_json_string() -> None:
     content_list = [{"type": "text", "text": "解析后的正文。", "page_idx": 0}]
-    mineru_result = {"results": {"document": {"content_list": json.dumps(content_list, ensure_ascii=False)}}}
+    document_parser_result = {"results": {"document": {"content_list": json.dumps(content_list, ensure_ascii=False)}}}
 
-    chunks = extract_chunks(mineru_result)
+    chunks = extract_chunks(document_parser_result)
 
     assert len(chunks) == 1
     assert chunks[0].content == "解析后的正文。"

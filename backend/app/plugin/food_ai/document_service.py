@@ -1,4 +1,4 @@
-"""Application service for the isolated MinerU document workflow."""
+"""Application service for the isolated DocumentParser document workflow."""
 
 from __future__ import annotations
 
@@ -16,13 +16,13 @@ from .document_answerer import AnswererUnavailable, DocumentAnswerer
 from .document_processing import count_pdf_pages, extract_chunks, sanitize_file_name, validate_upload
 from .document_repository import DocumentRepository
 from .document_schema import DocumentRecord, DocumentStatus
-from .mineru_client import MinerUClient, MinerUInvalidResponse, MinerUUnavailable
+from .document_parser_client import DocumentParserClient, DocumentParserInvalidResponse, DocumentParserUnavailable
 
 
 class DocumentService:
-    def __init__(self, repository: DocumentRepository, mineru: MinerUClient, storage_dir: Path | None = None, answerer: DocumentAnswerer | None = None) -> None:
+    def __init__(self, repository: DocumentRepository, document_parser: DocumentParserClient, storage_dir: Path | None = None, answerer: DocumentAnswerer | None = None) -> None:
         self.repository = repository
-        self.mineru = mineru
+        self.document_parser = document_parser
         self.storage_dir = storage_dir or settings.DOCUMENT_STORAGE_DIR
         self.answerer = answerer
 
@@ -43,26 +43,26 @@ class DocumentService:
         record = DocumentRecord(document_id=document_id, original_filename=Path(file.filename or "document").name, storage_path=str(path), content_type=file.content_type or "application/octet-stream", size_bytes=len(content), sha256=hashlib.sha256(content).hexdigest(), created_at=now, updated_at=now, expires_at=now + timedelta(days=settings.DOCUMENT_RETENTION_DAYS))
         self.repository.create_document(record)
         try:
-            task = await self.mineru.submit(path.name, content, record.content_type)
-        except MinerUUnavailable:
+            task = await self.document_parser.submit(path.name, content, record.content_type)
+        except DocumentParserUnavailable:
             self.repository.update_status(document_id, DocumentStatus.FAILED, error_message="文档解析服务暂不可用，请稍后重试。")
             raise CustomException(msg="文档解析服务暂不可用，请稍后重试。", status_code=status.HTTP_503_SERVICE_UNAVAILABLE) from None
-        except MinerUInvalidResponse:
+        except DocumentParserInvalidResponse:
             self.repository.update_status(document_id, DocumentStatus.FAILED, error_message="文档解析服务返回的数据无效。")
             raise CustomException(msg="文档解析服务返回的数据无效。", status_code=status.HTTP_502_BAD_GATEWAY) from None
-        return self.repository.update_status(document_id, DocumentStatus.PENDING, mineru_task_id=str(task["task_id"])) or record
+        return self.repository.update_status(document_id, DocumentStatus.PENDING, document_parser_task_id=str(task["task_id"])) or record
 
     async def refresh_status(self, document_id: str) -> tuple[DocumentRecord, str]:
         record = self._require_document(document_id)
         if record.status in {DocumentStatus.READY, DocumentStatus.FAILED}:
             return record, "ready" if record.status is DocumentStatus.READY else "failed"
-        if not record.mineru_task_id:
+        if not record.document_parser_task_id:
             return record, "queued"
         try:
-            upstream = await self.mineru.get_status(record.mineru_task_id)
-        except MinerUUnavailable:
+            upstream = await self.document_parser.get_status(record.document_parser_task_id)
+        except DocumentParserUnavailable:
             raise CustomException(msg="文档解析服务暂不可用，请稍后重试。", status_code=status.HTTP_503_SERVICE_UNAVAILABLE) from None
-        except MinerUInvalidResponse:
+        except DocumentParserInvalidResponse:
             raise CustomException(msg="文档解析服务返回的数据无效。", status_code=status.HTTP_502_BAD_GATEWAY) from None
         upstream_status = str(upstream.get("status", "")).lower()
         if upstream_status in {"failed", "error"}:
@@ -72,14 +72,14 @@ class DocumentService:
             record = self.repository.update_status(document_id, DocumentStatus.PROCESSING) or record
             return record, "parsing"
         try:
-            result = await self.mineru.get_result(record.mineru_task_id)
+            result = await self.document_parser.get_result(record.document_parser_task_id)
             chunks = [chunk.model_copy(update={"document_id": document_id}) for chunk in extract_chunks(result)]
             if not chunks:
                 raise ValueError("解析结果没有可预览文本")
             self.repository.replace_chunks(document_id, chunks)
-        except MinerUUnavailable:
+        except DocumentParserUnavailable:
             raise CustomException(msg="文档解析服务暂不可用，请稍后重试。", status_code=status.HTTP_503_SERVICE_UNAVAILABLE) from None
-        except (MinerUInvalidResponse, ValueError):
+        except (DocumentParserInvalidResponse, ValueError):
             record = self.repository.update_status(document_id, DocumentStatus.FAILED, error_message="文档解析结果无效。") or record
             return record, "failed"
         record = self.repository.update_status(document_id, DocumentStatus.READY) or record

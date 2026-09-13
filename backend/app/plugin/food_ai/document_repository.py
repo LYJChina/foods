@@ -24,7 +24,7 @@ class DocumentRepository:
                 """
                 INSERT INTO documents (
                     document_id, original_filename, storage_path, content_type, size_bytes, sha256,
-                    status, mineru_task_id, error_message, created_at, updated_at, expires_at
+                    status, document_parser_task_id, error_message, created_at, updated_at, expires_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 self._document_values(document),
@@ -36,7 +36,7 @@ class DocumentRepository:
         document_id: str,
         status: DocumentStatus,
         *,
-        mineru_task_id: str | None = None,
+        document_parser_task_id: str | None = None,
         error_message: str | None = None,
     ) -> DocumentRecord | None:
         updated_at = datetime.now(UTC)
@@ -44,11 +44,11 @@ class DocumentRepository:
             cursor = connection.execute(
                 """
                 UPDATE documents
-                SET status = ?, mineru_task_id = COALESCE(?, mineru_task_id),
+                SET status = ?, document_parser_task_id = COALESCE(?, document_parser_task_id),
                     error_message = ?, updated_at = ?
                 WHERE document_id = ?
                 """,
-                (status.value, mineru_task_id, error_message, self._serialize_datetime(updated_at), document_id),
+                (status.value, document_parser_task_id, error_message, self._serialize_datetime(updated_at), document_id),
             )
             if cursor.rowcount == 0:
                 return None
@@ -149,7 +149,7 @@ class DocumentRepository:
                     size_bytes INTEGER NOT NULL,
                     sha256 TEXT NOT NULL,
                     status TEXT NOT NULL,
-                    mineru_task_id TEXT,
+                    document_parser_task_id TEXT,
                     error_message TEXT,
                     created_at TEXT NOT NULL,
                     updated_at TEXT NOT NULL,
@@ -248,7 +248,7 @@ class DocumentRepository:
             document.size_bytes,
             document.sha256,
             document.status.value,
-            document.mineru_task_id,
+            document.document_parser_task_id,
             document.error_message,
             cls._serialize_datetime(document.created_at),
             cls._serialize_datetime(document.updated_at),
