@@ -1,5 +1,8 @@
 from datetime import UTC, datetime, timedelta
 
+import pytest
+
+from app.config.setting import Settings
 from app.plugin.food_ai.document_repository import DocumentRepository
 from app.plugin.food_ai.document_schema import DocumentChunk, DocumentRecord, DocumentStatus, QuestionResult
 
@@ -110,3 +113,41 @@ def test_delete_cascades_chunks_questions_and_expired_documents(tmp_path) -> Non
     assert repository.delete_expired(datetime.now(UTC)) == 1
     assert repository.get_document("doc-expired") is None
     assert repository.get_document("doc-retained") is not None
+
+
+def test_document_settings_default_to_one_day_retention_and_page_limit() -> None:
+    settings = Settings(_env_file=None)
+
+    assert settings.DOCUMENT_RETENTION_DAYS == 1
+    assert settings.DOCUMENT_MAX_PAGES == 100
+
+
+def test_delete_expired_removes_fts_entries_when_fts5_is_available(tmp_path) -> None:
+    repository = DocumentRepository(tmp_path / "documents.db")
+    if not repository._fts_available:
+        pytest.skip("SQLite 构建未提供 FTS5")
+    repository.create_document(
+        build_document(
+            document_id="doc-expired",
+            storage_path="documents/doc-expired.pdf",
+            expires_at=datetime.now(UTC) - timedelta(seconds=1),
+        )
+    )
+    repository.replace_chunks(
+        "doc-expired",
+        [
+            DocumentChunk(
+                document_id="doc-expired",
+                chunk_index=0,
+                content="过期文档的食品标签内容",
+            )
+        ],
+    )
+
+    assert repository.delete_expired(datetime.now(UTC)) == 1
+    with repository._connect() as connection:
+        fts_rows = connection.execute(
+            "SELECT document_id FROM document_chunks_fts WHERE document_id = ?",
+            ("doc-expired",),
+        ).fetchall()
+    assert fts_rows == []

@@ -128,8 +128,14 @@ class DocumentRepository:
     def delete_expired(self, now: datetime | None = None) -> int:
         cutoff = self._serialize_datetime(now or datetime.now(UTC))
         with self._connect() as connection:
-            cursor = connection.execute("DELETE FROM documents WHERE expires_at <= ?", (cutoff,))
-        return cursor.rowcount
+            rows = connection.execute("SELECT document_id FROM documents WHERE expires_at <= ?", (cutoff,)).fetchall()
+            document_ids = [row["document_id"] for row in rows]
+            if self._fts_available:
+                connection.executemany("DELETE FROM document_chunks_fts WHERE document_id = ?", ((document_id,) for document_id in document_ids))
+            deleted_count = sum(
+                connection.execute("DELETE FROM documents WHERE document_id = ?", (document_id,)).rowcount for document_id in document_ids
+            )
+        return deleted_count
 
     def _initialize(self) -> None:
         with self._connect() as connection:
