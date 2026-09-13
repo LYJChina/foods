@@ -37,6 +37,7 @@ describe("public portal routes", () => {
       "precheck/:taskId",
       "scenarios",
       "diagnosis",
+      "documents",
     ]);
     expect(children.every((route) => route.meta?.public === true)).toBe(true);
   });
