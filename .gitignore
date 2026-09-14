@@ -38,6 +38,7 @@ cython_debug
 venv
 .venv
 .env.local
+.env.local.tmp.*
 .runtime/
 document-parser/.venv/
 

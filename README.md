@@ -26,6 +26,7 @@
 
 ### 一键启停
 
+- 配置问答与文档解析模型：`./configure.sh`（API key 输入不回显，写入本地 `.env.local`）
 - 启动全部服务：`./start.sh`
 - 停止由脚本启动的服务：`./stop.sh`
 
