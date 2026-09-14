@@ -61,6 +61,7 @@ def test_start_script_launches_all_three_services() -> None:
     assert "backend/.venv/bin/uvicorn" in source
     assert "frontend/web/node_modules/.bin/vite" in source
     assert "pnpm dev" not in source
+    assert 'VITE_API_BASE_URL="${VITE_API_BASE_URL:-http://127.0.0.1:8001}"' in source
     assert "8002" in source
     assert "8001" in source
     assert "5180" in source
