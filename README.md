@@ -34,6 +34,36 @@
 
 浏览器访问 `http://127.0.0.1:5180/web/#/portal/home`，公共门户无需登录。
 
+### Windows Docker 开发启动
+
+Windows 下推荐使用根目录的 `compose.demo.yaml`，它不依赖 `start.sh` 的 Unix 虚拟环境路径：
+
+```powershell
+docker compose -f compose.demo.yaml up --build
+```
+
+如需后台运行，可使用 `docker compose -f compose.demo.yaml up --build -d`。服务端口为：前端 `5180`、平台后端 `8001`、文档解析 `8002`；前端 API 前缀为 `/api/v1`。
+
+启动后访问 `http://127.0.0.1:5180/web/#/portal/home`。停止服务：
+
+```powershell
+docker compose -f compose.demo.yaml down
+```
+
+查看日志：
+
+```powershell
+docker compose -f compose.demo.yaml logs -f backend
+```
+
+查看服务状态：
+
+```powershell
+docker compose -f compose.demo.yaml ps
+```
+
+该开发栈只启动文档解析、平台后端和门户前端，不启动现有生产 Compose 中的 MySQL、Redis、Nginx。首次构建需要 Docker 能访问镜像仓库和 Python/npm 包仓库；`.env.local`（如存在）只注入后端，真实 API key 不会写入镜像或前端。
+
 智能问答和文档问答使用 `DOCUMENT_LLM_*`，文档多模态解析使用 `MULTIMODAL_*`。真实 API key 只能写入 `.env.local`，不得写入前端、截图、公开文档或 Git 仓库。
 
 安全与来源说明：
