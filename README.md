@@ -4,15 +4,36 @@
 
 ## 本地启动
 
-按以下顺序启动三个进程：
+文档解析服务已和平台源码放在同一个仓库中。首次克隆后配置三套互相隔离的环境，以后只需在根目录执行一条命令。
 
-1. 文档解析服务：监听 `127.0.0.1:8002`，平台通过 `DOCUMENT_PARSER_URL` 调用；具体命令以该服务自身说明为准。
-2. 平台 FastAPI：进入 `backend` 后执行 `.venv/bin/uvicorn app:create_app --factory --lifespan off --host 127.0.0.1 --port 8001`。
-3. Web 前端：进入 `frontend/web` 后执行 `VITE_API_BASE_URL=http://127.0.0.1:8001 pnpm dev --host 127.0.0.1`。
+### 环境要求
+
+| 目录 | 运行时 | 建议版本 |
+| --- | --- | --- |
+| `document-parser/` | Python | 3.12（支持 3.10–3.13） |
+| `backend/` | Python | 3.12 |
+| `frontend/web/` | Node.js + pnpm | Node.js ≥ 20.19，pnpm 9 |
+
+### 首次配置
+
+1. 复制 `.env.local.example` 为 `.env.local`，填写问答模型和多模态解析模型的地址、模型名与 API key。`.env.local` 已忽略，不得提交。
+2. 配置文档解析环境：
+   - `python3.12 -m venv document-parser/.venv`
+   - `document-parser/.venv/bin/python -m pip install -U pip`
+   - `document-parser/.venv/bin/python -m pip install -e './document-parser[pipeline]'`
+3. 按 `backend/README.md` 配置 `backend/.venv`。当前已验证的开发环境使用 Python 3.12。
+4. 配置前端：在 `frontend/web` 执行 `pnpm install`。
+
+### 一键启停
+
+- 启动全部服务：`./start.sh`
+- 停止由脚本启动的服务：`./stop.sh`
+
+`start.sh` 会依次启动文档解析 `8002`、平台后端 `8001` 和门户前端 `5180`，等待健康检查后自动打开首页。日志保存在 `.runtime/logs/`。如果目标端口已被其他进程占用，脚本会停止并提示，不会结束未知进程。
 
 浏览器访问 `http://127.0.0.1:5180/web/#/portal/home`，公共门户无需登录。
 
-智能问答和文档问答共用后端环境变量 `DOCUMENT_LLM_BASE_URL`、`DOCUMENT_LLM_MODEL`、`DOCUMENT_LLM_API_KEY` 和 `DOCUMENT_LLM_TIMEOUT_SECONDS`。仅将真实 API key 写入已忽略的 `backend/env/.env.dev`，不得写入前端、截图、公开文档或 Git 仓库。未配置模型时接口会返回明确的 503，不生成虚假答案。
+智能问答和文档问答使用 `DOCUMENT_LLM_*`，文档多模态解析使用 `MULTIMODAL_*`。真实 API key 只能写入 `.env.local`，不得写入前端、截图、公开文档或 Git 仓库。
 
 安全与来源说明：
 

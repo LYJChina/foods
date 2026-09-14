@@ -37,6 +37,9 @@ cython_debug
 
 venv
 .venv
+.env.local
+.runtime/
+document-parser/.venv/
 
 node_modules
 .npm
@@ -45,6 +48,7 @@ node_modules
 
 backend/logs
 backend/*.db
+backend/data/documents/
 # 用户上传目录，禁止入库
 backend/static/upload/
 backend/env/.env.dev
